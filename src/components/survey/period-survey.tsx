@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import frameworkQuestions from '@/data/framework-questions.json';
+import { useAuthContext } from '@/contexts/auth-context';
 
 interface Question {
   id: string;
@@ -29,6 +30,7 @@ interface SurveyProps {
 type YusaAccessFilter = 'all' | 'yusa_access' | 'non_yusa_access';
 
 export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
+  const { user } = useAuthContext();
   const [currentSection, setCurrentSection] = useState<'Risk Mitigation' | 'Governance' | 'Engagement'>('Risk Mitigation');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<Record<string, any>>({});
@@ -150,6 +152,8 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           percentage
         },
         yusaAccessFilter,
+        organizationId: user?.organizationId, // Include organizationId from auth context
+        submittedBy: user?.email || 'current-user',
         completed: true
       };
       
@@ -170,8 +174,8 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           fileUploads: submission.fileUploads,
           score: submission.score,
           yusaAccessFilter: submission.yusaAccessFilter,
-          submittedBy: 'current-user' // In real app, get from auth context
-          // organizationId is optional and will be set by backend based on user context
+          submittedBy: user?.email || 'current-user',
+          organizationId: user?.organizationId // Get organizationId from authenticated user context
         };
         
         const response = await fetch('/api/v1/submissions', {

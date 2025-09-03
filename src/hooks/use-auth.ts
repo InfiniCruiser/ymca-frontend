@@ -26,7 +26,7 @@ export function useAuth() {
       email: 'john.doe@ymca.org',
       firstName: 'John',
       lastName: 'Doe',
-      organizationId: '1',
+      organizationId: 'f357cb0b-b881-4166-8516-1c0783d4a5a2', // Duluth Area Family YMCA
       role: 'PROGRAM_OWNER',
       programAreas: ['Child Protection', 'Governance'],
       locations: ['Main Branch'],
@@ -51,7 +51,7 @@ export function useAuth() {
       email,
       firstName: 'John',
       lastName: 'Doe',
-      organizationId: '1',
+      organizationId: 'f357cb0b-b881-4166-8516-1c0783d4a5a2', // Duluth Area Family YMCA
       role: 'PROGRAM_OWNER',
       programAreas: ['Child Protection', 'Governance'],
       locations: ['Main Branch'],
