@@ -1,0 +1,164 @@
+/* YMCA Brand Color Sets */
+
+:root {
+  /* Set 1: Red + Orange */
+  --ymca-red-arm: #ed1c24;
+  --ymca-orange-tip: #fbb040;
+  --ymca-red-text: #ed1c24;
+  --ymca-orange-ymca: #f47920;
+
+  /* Set 2: Teal + Blue (DEFAULT) */
+  --ymca-teal-arm: #00a99d;
+  --ymca-blue-tip: #0072bc;
+  --ymca-teal-text: #00a99d;
+  --ymca-blue-ymca: #0072bc;
+
+  /* Set 3: Yellow + Teal */
+  --ymca-yellow-arm: #fbb040;
+  --ymca-teal-tip: #00a99d;
+  --ymca-yellow-text: #fbb040;
+  --ymca-teal-ymca: #00a99d;
+
+  /* Set 4: Blue + Purple */
+  --ymca-blue-arm: #00aeef;
+  --ymca-purple-tip: #92278f;
+  --ymca-blue-text: #00aeef;
+  --ymca-purple-ymca: #92278f;
+
+  /* Set 5: Purple + Red */
+  --ymca-purple-arm: #92278f;
+  --ymca-red-tip: #ed1c24;
+  --ymca-purple-text: #92278f;
+  --ymca-red-ymca: #ed1c24;
+
+  /* Active Color Set (Default: Set 2) */
+  --primary-color: var(--ymca-teal-arm);
+  --secondary-color: var(--ymca-blue-tip);
+  --primary-text: var(--ymca-teal-text);
+  --secondary-text: var(--ymca-blue-ymca);
+}
+
+/* Color Set 1: Red + Orange */
+[data-color-set="1"] {
+  --primary-color: var(--ymca-red-arm);
+  --secondary-color: var(--ymca-orange-tip);
+  --primary-text: var(--ymca-red-text);
+  --secondary-text: var(--ymca-orange-ymca);
+}
+
+/* Color Set 2: Teal + Blue (Default) */
+[data-color-set="2"] {
+  --primary-color: var(--ymca-teal-arm);
+  --secondary-color: var(--ymca-blue-tip);
+  --primary-text: var(--ymca-teal-text);
+  --secondary-text: var(--ymca-blue-ymca);
+}
+
+/* Color Set 3: Yellow + Teal */
+[data-color-set="3"] {
+  --primary-color: var(--ymca-yellow-arm);
+  --secondary-color: var(--ymca-teal-tip);
+  --primary-text: var(--ymca-yellow-text);
+  --secondary-text: var(--ymca-teal-ymca);
+}
+
+/* Color Set 4: Blue + Purple */
+[data-color-set="4"] {
+  --primary-color: var(--ymca-blue-arm);
+  --secondary-color: var(--ymca-purple-tip);
+  --primary-text: var(--ymca-blue-text);
+  --secondary-text: var(--ymca-purple-ymca);
+}
+
+/* Color Set 5: Purple + Red */
+[data-color-set="5"] {
+  --primary-color: var(--ymca-purple-arm);
+  --secondary-color: var(--ymca-red-tip);
+  --primary-text: var(--ymca-purple-text);
+  --secondary-text: var(--ymca-red-ymca);
+}
+
+/* Color Palette Selector Styles */
+.color-palette-selector {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 1rem;
+  min-width: 200px;
+}
+
+.color-palette-selector h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.palette-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.palette-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.palette-option:hover {
+  background: #f8f9fa;
+}
+
+.palette-option.active {
+  background: #e3f2fd;
+  border-color: var(--primary-color);
+}
+
+.palette-preview {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.palette-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+/* Set 1 Preview */
+.palette-option[data-set="1"] .palette-preview {
+  background: linear-gradient(135deg, var(--ymca-red-arm), var(--ymca-orange-tip));
+}
+
+/* Set 2 Preview */
+.palette-option[data-set="2"] .palette-preview {
+  background: linear-gradient(135deg, var(--ymca-teal-arm), var(--ymca-blue-tip));
+}
+
+/* Set 3 Preview */
+.palette-option[data-set="3"] .palette-preview {
+  background: linear-gradient(135deg, var(--ymca-yellow-arm), var(--ymca-teal-tip));
+}
+
+/* Set 4 Preview */
+.palette-option[data-set="4"] .palette-preview {
+  background: linear-gradient(135deg, var(--ymca-blue-arm), var(--ymca-purple-tip));
+}
+
+/* Set 5 Preview */
+.palette-option[data-set="5"] .palette-preview {
+  background: linear-gradient(135deg, var(--ymca-purple-arm), var(--ymca-red-tip));
+} 

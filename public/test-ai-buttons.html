@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Button Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .ai-advisory-section {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .advisory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .advisory-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .advisory-content {
+            min-height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+        .advisory-placeholder {
+            text-align: center;
+            color: #6c757d;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 AI Button Event Listener Test</h1>
+        <p>This page tests the AI advisory button event listeners to debug the "press twice" issue.</p>
+        
+        <div class="ai-advisory-section">
+            <div class="advisory-header">
+                <h3>AI Performance Analysis</h3>
+                <div class="advisory-controls">
+                    <button class="btn btn-primary" id="generate-analysis-btn">
+                        <span class="btn-text">Generate AI Analysis</span>
+                        <span class="btn-loading" style="display: none;">
+                            <i class="spinner"></i> Analyzing...
+                        </span>
+                    </button>
+                    <button class="btn btn-secondary" id="refresh-analysis-btn">
+                        <span class="btn-text">Refresh Analysis</span>
+                        <span class="btn-loading" style="display: none;">
+                            <i class="spinner"></i> Refreshing...
+                        </span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="advisory-content" id="advisory-content">
+                <div class="advisory-placeholder">
+                    <p>Click "Generate AI Analysis" to test the event listeners.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="log" id="log">
+            <strong>Event Log:</strong><br>
+            <span id="log-content">Waiting for button clicks...</span>
+        </div>
+    </div>
+
+    <script>
+        // Simple logging function
+        function log(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<br>[${timestamp}] ${message}`;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        // Test event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Page loaded, setting up event listeners...');
+            
+            const generateBtn = document.getElementById('generate-analysis-btn');
+            const refreshBtn = document.getElementById('refresh-analysis-btn');
+            const contentArea = document.getElementById('advisory-content');
+            
+            if (generateBtn) {
+                log('✅ Generate button found');
+                
+                // Remove any existing listeners
+                generateBtn.removeEventListener('click', handleGenerateClick);
+                
+                // Add new listener
+                generateBtn.addEventListener('click', handleGenerateClick);
+                log('✅ Generate button event listener attached');
+            } else {
+                log('❌ Generate button not found');
+            }
+            
+            if (refreshBtn) {
+                log('✅ Refresh button found');
+                
+                // Remove any existing listeners
+                refreshBtn.removeEventListener('click', handleRefreshClick);
+                
+                // Add new listener
+                refreshBtn.addEventListener('click', handleRefreshClick);
+                log('✅ Refresh button event listener attached');
+            } else {
+                log('❌ Refresh button not found');
+            }
+        });
+        
+        async function handleGenerateClick() {
+            log('🔘 Generate button clicked!');
+            
+            try {
+                // Show loading state
+                const btn = document.getElementById('generate-analysis-btn');
+                const btnText = btn.querySelector('.btn-text');
+                const btnLoading = btn.querySelector('.btn-loading');
+                
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'inline';
+                btn.disabled = true;
+                
+                // Simulate API call
+                log('📡 Making API call to /api/ai-analysis...');
+                
+                const response = await fetch('/api/ai-analysis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: {
+                            system: 'You are a YMCA performance analyst. Provide a brief analysis.',
+                            user: 'Analyze this YMCA performance: Total Score: 75/80 (93.75%). What are the key strengths and areas for improvement?'
+                        },
+                        context: {
+                            ymcaName: 'Test YMCA',
+                            totalScore: 75,
+                            maxScore: 80
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ AI analysis successful');
+                    
+                    // Update content
+                    const contentArea = document.getElementById('advisory-content');
+                    contentArea.innerHTML = `
+                        <div style="color: green; font-weight: bold;">✅ Analysis Generated Successfully!</div>
+                        <div style="margin-top: 10px; padding: 10px; background: #e8f5e8; border-radius: 4px;">
+                            <strong>AI Response:</strong><br>
+                            ${data.content.substring(0, 200)}...
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.error || 'AI analysis failed');
+                }
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+                
+                // Update content with error
+                const contentArea = document.getElementById('advisory-content');
+                contentArea.innerHTML = `
+                    <div style="color: red; font-weight: bold;">❌ Error: ${error.message}</div>
+                `;
+            } finally {
+                // Reset button state
+                const btn = document.getElementById('generate-analysis-btn');
+                const btnText = btn.querySelector('.btn-text');
+                const btnLoading = btn.querySelector('.btn-loading');
+                
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+        
+        function handleRefreshClick() {
+            log('🔘 Refresh button clicked!');
+            
+            // Reset content
+            const contentArea = document.getElementById('advisory-content');
+            contentArea.innerHTML = `
+                <div class="advisory-placeholder">
+                    <p>Click "Generate AI Analysis" to test the event listeners.</p>
+                </div>
+            `;
+            
+            log('✅ Content refreshed');
+        }
+    </script>
+</body>
+</html>

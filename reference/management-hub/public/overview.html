@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUSA OEA Management</title>
+    <link rel="stylesheet" href="color-palettes.css">
+    <link rel="stylesheet" href="ymca-logos.css">
+    <link rel="stylesheet" href="overview-styles.css">
+    <link rel="stylesheet" href="map-view-styles.css">
+    <link rel="stylesheet" href="ai-advisory-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-color-set="2">
+    <div id="app">
+        <!-- Color Palette Selector -->
+        <!-- <div class="color-palette-selector">
+            <h3>Color Theme</h3>
+            <div class="palette-options">
+                <div class="palette-option" data-set="1">
+                    <div class="palette-logo ymca-logo-set-1"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Red + Orange</span>
+                </div>
+                <div class="palette-option active" data-set="2">
+                    <div class="palette-logo ymca-logo-set-2"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Teal + Blue</span>
+                </div>
+                <div class="palette-option" data-set="3">
+                    <div class="palette-logo ymca-logo-set-3"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Yellow + Teal</span>
+                </div>
+                <div class="palette-option" data-set="4">
+                    <div class="palette-logo ymca-logo-set-4"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Blue + Purple</span>
+                </div>
+                <div class="palette-option" data-set="5">
+                    <div class="palette-logo ymca-logo-set-5"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Purple + Red</span>
+                </div>
+            </div>
+        </div> -->
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="ymca-logo-container">
+                    <div class="ymca-logo-set-2" id="current-logo"></div>
+                </div>
+                <div class="logo-section">
+                    <h1 class="main-title">YUSA OEA Management Hub</h1>
+                    <!-- <p class="subtitle">Organizational Excellence Assessment - Network Performance</p> -->
+                </div>
+                <div class="view-controls">
+                    <button class="view-btn active" id="treemap-view">Treemap View</button>
+                    <button class="view-btn" id="table-view">Table View</button>
+                    <button class="view-btn" id="map-view">Map View</button>
+                    <button class="view-btn" id="analytics-view">Analytics</button>
+                    <button class="view-btn" id="metrics-view">Metrics Overview</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Overview Content -->
+        <main class="overview-main">
+            <!-- Treemap Section -->
+            <section class="treemap-section" id="treemap-section">
+                <div class="section-header">
+                    <h2>YMCA Performance Overview</h2>
+                    <p class="section-description">
+                        Network-wide performance visualization. Size represents member count, color indicates overall performance score.
+                    </p>
+                </div>
+                
+                <div class="treemap-container">
+                                                <div class="treemap-controls">
+                                <div class="sort-controls">
+                                    <label for="sort-select">Sort by:</label>
+                                    <select id="sort-select" class="sort-dropdown">
+                                        <option value="performance">Performance (High to Low)</option>
+                                        <option value="performance-asc">Performance (Low to High)</option>
+                                        <option value="members">Member Count (High to Low)</option>
+                                        <option value="members-asc">Member Count (Low to High)</option>
+                                        <option value="operational">Operational Score (High to Low)</option>
+                                        <option value="operational-asc">Operational Score (Low to High)</option>
+                                        <option value="financial">Financial Score (High to Low)</option>
+                                        <option value="financial-asc">Financial Score (Low to High)</option>
+                                        <option value="name">Name (A-Z)</option>
+                                        <option value="name-desc">Name (Z-A)</option>
+                                        <option value="support">Support Level</option>
+                                    </select>
+                                </div>
+                                <div class="treemap-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color high"></span>
+                                        <span>High Performance (70-100%)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color moderate"></span>
+                                        <span>Moderate Performance (40-69%)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color low"></span>
+                                        <span>Low Performance (0-39%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                    <div class="treemap-grid" id="treemap-grid">
+                        <!-- Treemap tiles will be generated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Table View Section -->
+            <section class="table-section hidden" id="table-section">
+                <div class="section-header">
+                    <h2>Performance Comparison Table</h2>
+                    <p class="section-description">
+                        Detailed performance metrics across all YMCAs in the network.
+                    </p>
+                </div>
+                
+                <div class="table-container">
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>YMCA</th>
+                                <th>Members</th>
+                                <th>Total Score</th>
+                                <th>Operational</th>
+                                <th>Financial</th>
+                                <th>Support Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Table rows will be generated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Map View Section -->
+            <section class="map-section hidden" id="map-section">
+                <div class="section-header">
+                    <h2>Geographic Performance Distribution</h2>
+                    <p class="section-description">
+                        Interactive map showing YMCA locations with performance indicators. Click markers for details.
+                    </p>
+                </div>
+                
+                <div class="map-container">
+                    <div id="ymca-map">
+                        <div id="map-loading" style="display: flex; align-items: center; justify-content: center; height: 600px; background: #f8f9fa; color: #666;">
+                            <div style="text-align: center;">
+                                <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                                <p>Loading YMCA Map...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="map-legend">
+                        <h3>Performance Legend</h3>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #2ecc71;"></span>
+                            <span>High Performance (70-100%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #3498db;"></span>
+                            <span>Moderate Performance (40-69%)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #e74c3c;"></span>
+                            <span>Low Performance (0-39%)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics View Section -->
+            <section class="analytics-section hidden" id="analytics-section">
+                <div class="section-header">
+                    <h2>Performance Analytics</h2>
+                    <p class="section-description">
+                        Comprehensive analysis of YMCA network performance across multiple dimensions.
+                    </p>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Performance Distribution</h3>
+                        <canvas id="performance-chart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Geographic Distribution</h3>
+                        <canvas id="geo-chart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Operational vs Financial</h3>
+                        <canvas id="operational-financial-chart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Support Level Analysis</h3>
+                        <canvas id="support-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Metrics Overview Section -->
+            <section class="metrics-section hidden" id="metrics-section">
+                <div class="section-header">
+                    <h2>Metrics Overview</h2>
+                    <p class="section-description">
+                        Network-wide performance by metric category.
+                    </p>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-category">
+                        <h3>Operational Performance</h3>
+                        <div class="metric-stats">
+                            <div class="metric-stat">
+                                <span class="stat-label">Average Score</span>
+                                <span class="stat-value" id="avg-operational">0</span>
+                            </div>
+                            <div class="metric-stat">
+                                <span class="stat-label">Top Performer</span>
+                                <span class="stat-value" id="top-operational">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-category">
+                        <h3>Financial Performance</h3>
+                        <div class="metric-stats">
+                            <div class="metric-stat">
+                                <span class="stat-label">Average Score</span>
+                                <span class="stat-value" id="avg-financial">0</span>
+                            </div>
+                            <div class="metric-stat">
+                                <span class="stat-label">Top Performer</span>
+                                <span class="stat-value" id="top-financial">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Navigation to Detail View -->
+        <div class="nav-to-detail">
+            <button class="detail-btn">
+                <i class="fas fa-chart-line"></i>
+                Go to Detail Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- AI Advisory System -->
+    <script src="ai-advisory-framework.js"></script>
+    <script src="ai-config-manager.js"></script>
+    <script src="ai-advisory-ui.js"></script>
+    <script src="ai-advisory-integration.js"></script>
+    
+    <!-- Main Application -->
+    <script src="api-service.js"></script>
+    <script src="overview.js"></script>
+</body>
+</html> 

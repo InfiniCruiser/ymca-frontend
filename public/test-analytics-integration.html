@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Integration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Analytics Integration Test</h1>
+    
+    <div class="test-section info">
+        <h3>Test Overview</h3>
+        <p>This page tests the analytics integration to verify:</p>
+        <ul>
+            <li>Backend API connectivity</li>
+            <li>AI Framework script loading</li>
+            <li>Data transformation</li>
+            <li>Real-time data fetching</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>1. Backend API Test</h3>
+        <button onclick="testBackendAPI()">Test Backend Connection</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. AI Framework Scripts Test</h3>
+        <button onclick="testAIFrameworkScripts()">Test Script Loading</button>
+        <div id="scripts-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Data Integration Test</h3>
+        <button onclick="testDataIntegration()">Test Data Integration</button>
+        <div id="integration-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Full Analytics Test</h3>
+        <button onclick="testFullAnalytics()">Test Complete Analytics</button>
+        <div id="analytics-result"></div>
+    </div>
+
+    <script>
+        // Test 1: Backend API Connection
+        async function testBackendAPI() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.innerHTML = '<p>Testing backend connection...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/v1/performance-calculations');
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Backend API Connected Successfully</h4>
+                            <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                            <p><strong>Records Found:</strong> ${data.length}</p>
+                            <p><strong>Sample Data:</strong></p>
+                            <pre>${JSON.stringify(data[0], null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Backend API Connection Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 2: AI Framework Scripts
+        async function testAIFrameworkScripts() {
+            const resultDiv = document.getElementById('scripts-result');
+            resultDiv.innerHTML = '<p>Testing AI framework scripts...</p>';
+            
+            const scripts = [
+                '/api-service.js',
+                '/overview.js',
+                '/ai-advisory-ui.js'
+            ];
+            
+            const results = [];
+            
+            for (const script of scripts) {
+                try {
+                    const response = await fetch(script);
+                    if (response.ok) {
+                        results.push(`✅ ${script} - Available`);
+                    } else {
+                        results.push(`❌ ${script} - Not Found (${response.status})`);
+                    }
+                } catch (error) {
+                    results.push(`❌ ${script} - Error: ${error.message}`);
+                }
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="info">
+                    <h4>AI Framework Scripts Status</h4>
+                    <ul>${results.map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+
+        // Test 3: Data Integration
+        async function testDataIntegration() {
+            const resultDiv = document.getElementById('integration-result');
+            resultDiv.innerHTML = '<p>Testing data integration...</p>';
+            
+            try {
+                // Load the API service
+                const script = document.createElement('script');
+                script.src = '/api-service.js';
+                document.head.appendChild(script);
+                
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                });
+                
+                // Wait for API service to initialize
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                if (window.apiService) {
+                    const data = await window.apiService.getOverviewData();
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Data Integration Working</h4>
+                            <p><strong>API Service:</strong> Loaded successfully</p>
+                            <p><strong>Data Records:</strong> ${data.length}</p>
+                            <p><strong>Sample Transformed Data:</strong></p>
+                            <pre>${JSON.stringify(window.apiService.transformApiDataToLegacyFormat(data.slice(0, 2)), null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('API Service not available');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Data Integration Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 4: Full Analytics
+        async function testFullAnalytics() {
+            const resultDiv = document.getElementById('analytics-result');
+            resultDiv.innerHTML = '<p>Testing complete analytics integration...</p>';
+            
+            try {
+                // Test all components
+                const backendTest = await fetch('http://localhost:3001/api/v1/performance-calculations').then(r => r.ok);
+                const apiServiceTest = await fetch('/api-service.js').then(r => r.ok);
+                const overviewTest = await fetch('/overview.js').then(r => r.ok);
+                
+                if (backendTest && apiServiceTest && overviewTest) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Complete Analytics Integration Ready</h4>
+                            <p><strong>Backend API:</strong> ✅ Connected</p>
+                            <p><strong>API Service:</strong> ✅ Available</p>
+                            <p><strong>Overview Scripts:</strong> ✅ Loaded</p>
+                            <p><strong>Status:</strong> All systems operational!</p>
+                            <p><strong>Next Step:</strong> Navigate to <a href="/analytics" target="_blank">/analytics</a> to see the full dashboard.</p>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('One or more components failed');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Analytics Integration Issues</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Please check the individual tests above for specific issues.</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

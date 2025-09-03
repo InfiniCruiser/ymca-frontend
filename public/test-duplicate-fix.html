@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicate Script Loading Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Duplicate Script Loading Test</h1>
+        <p>This page tests that AI framework scripts are not loaded multiple times.</p>
+        
+        <div>
+            <button class="btn" onclick="loadScriptsOnce()">Load Scripts Once</button>
+            <button class="btn" onclick="loadScriptsAgain()">Load Scripts Again</button>
+            <button class="btn" onclick="checkGlobalObjects()">Check Global Objects</button>
+            <button class="btn" onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div class="log" id="log">
+            <strong>Test Log:</strong><br>
+            <span id="log-content">Ready to test...</span>
+        </div>
+    </div>
+
+    <script>
+        // Simple logging function
+        function log(message, type = 'info') {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            const colorClass = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            logContent.innerHTML += `<br>[${timestamp}] <span class="${colorClass}">${message}</span>`;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('log-content').innerHTML = 'Log cleared...';
+        }
+
+        function loadScriptsOnce() {
+            log('🚀 Loading AI framework scripts for the first time...');
+            
+            const scripts = [
+                '/ai-framework/overview.js',
+                '/ai-framework/ai-advisory-framework.js',
+                '/ai-framework/ai-config-manager.js',
+                '/ai-framework/ai-advisory-ui.js',
+                '/ai-framework/ai-advisory-integration.js',
+                '/ai-framework/api-service.js',
+                '/ai-framework/ai-framework-init.js'
+            ];
+
+            let loadedCount = 0;
+            scripts.forEach(src => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    loadedCount++;
+                    log(`✅ Loaded: ${src}`, 'success');
+                    if (loadedCount === scripts.length) {
+                        log('🎉 All scripts loaded successfully!', 'success');
+                        checkGlobalObjects();
+                    }
+                };
+                script.onerror = (error) => {
+                    log(`❌ Failed to load: ${src}`, 'error');
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        function loadScriptsAgain() {
+            log('🔄 Attempting to load AI framework scripts again...', 'warning');
+            
+            const scripts = [
+                '/ai-framework/overview.js',
+                '/ai-framework/ai-advisory-framework.js',
+                '/ai-framework/ai-config-manager.js',
+                '/ai-framework/ai-advisory-ui.js',
+                '/ai-framework/ai-advisory-integration.js',
+                '/ai-framework/api-service.js',
+                '/ai-framework/ai-framework-init.js'
+            ];
+
+            let loadedCount = 0;
+            scripts.forEach(src => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    loadedCount++;
+                    log(`✅ Loaded: ${src}`, 'success');
+                    if (loadedCount === scripts.length) {
+                        log('🎉 Second load completed!', 'success');
+                        checkGlobalObjects();
+                    }
+                };
+                script.onerror = (error) => {
+                    log(`❌ Failed to load: ${src}`, 'error');
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        function checkGlobalObjects() {
+            log('🔍 Checking global objects...');
+            
+            const objects = [
+                'overviewData',
+                'AIProviderInterface',
+                'AIConfigManager',
+                'AIAdvisoryUI',
+                'AIAdvisoryIntegration',
+                'APIService',
+                'AdvisorManager',
+                'AzureOpenAIProvider'
+            ];
+
+            objects.forEach(objName => {
+                if (window[objName]) {
+                    log(`✅ ${objName} is available`, 'success');
+                } else {
+                    log(`❌ ${objName} is NOT available`, 'error');
+                }
+            });
+
+            // Check for duplicate script tags
+            const scriptTags = document.querySelectorAll('script[src*="ai-framework"]');
+            log(`📊 Found ${scriptTags.length} AI framework script tags`);
+            
+            const scriptSources = {};
+            scriptTags.forEach(script => {
+                const src = script.src;
+                scriptSources[src] = (scriptSources[src] || 0) + 1;
+            });
+
+            Object.entries(scriptSources).forEach(([src, count]) => {
+                if (count > 1) {
+                    log(`⚠️ Duplicate script found: ${src} (${count} times)`, 'warning');
+                } else {
+                    log(`✅ Single instance: ${src}`, 'success');
+                }
+            });
+        }
+
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            log('📄 Page loaded, checking initial state...');
+            checkGlobalObjects();
+        });
+    </script>
+</body>
+</html>

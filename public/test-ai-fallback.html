@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fallback Mode Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .ai-advisory-section {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .advisory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .advisory-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .advisory-content {
+            min-height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+        .advisory-placeholder {
+            text-align: center;
+            color: #6c757d;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .warning {
+            color: orange;
+        }
+        .info {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 AI Fallback Mode Test</h1>
+        <p>This page tests that AI analysis works correctly on first attempt using fallback mode.</p>
+        
+        <div class="ai-advisory-section">
+            <div class="advisory-header">
+                <h3>AI Performance Analysis</h3>
+                <div class="advisory-controls">
+                    <button class="btn btn-primary" id="generate-analysis-btn">
+                        <span class="btn-text">Generate AI Analysis</span>
+                        <span class="btn-loading" style="display: none;">
+                            <i class="spinner"></i> Analyzing...
+                        </span>
+                    </button>
+                    <button class="btn btn-secondary" id="refresh-analysis-btn">
+                        <span class="btn-text">Refresh Analysis</span>
+                        <span class="btn-loading" style="display: none;">
+                            <i class="spinner"></i> Refreshing...
+                        </span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="advisory-content" id="advisory-content">
+                <div class="advisory-placeholder">
+                    <p>Click "Generate AI Analysis" to test fallback mode on first attempt.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="log" id="log">
+            <strong>Test Log:</strong><br>
+            <span id="log-content">Ready to test fallback mode...</span>
+        </div>
+    </div>
+
+    <script>
+        // Simple logging function
+        function log(message, type = 'info') {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            const colorClass = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            logContent.innerHTML += `<br>[${timestamp}] <span class="${colorClass}">${message}</span>`;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        // Test fallback mode
+        async function testFallbackMode() {
+            log('🚀 Testing AI fallback mode...', 'info');
+            
+            try {
+                // Load AI framework scripts
+                const scripts = [
+                    '/ai-framework/overview.js',
+                    '/ai-framework/ai-advisory-framework.js',
+                    '/ai-framework/ai-config-manager.js',
+                    '/ai-framework/ai-advisory-ui.js',
+                    '/ai-framework/ai-advisory-integration.js',
+                    '/ai-framework/api-service.js',
+                    '/ai-framework/ai-framework-init.js'
+                ];
+
+                let loadedCount = 0;
+                for (const src of scripts) {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    await new Promise((resolve, reject) => {
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                    loadedCount++;
+                    log(`✅ Loaded: ${src}`, 'success');
+                }
+
+                log('🎉 All scripts loaded, initializing fallback mode...', 'success');
+                
+                // Wait for scripts to initialize
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Initialize AI Advisory Integration in fallback mode
+                if (window.AIAdvisoryIntegration) {
+                    const aiIntegration = new window.AIAdvisoryIntegration();
+                    aiIntegration.initializeFallbackMode();
+                    
+                    log('✅ AI Advisory Integration initialized in fallback mode', 'success');
+                    
+                    // Set test data
+                    window.currentData = {
+                        organization: {
+                            id: 'test-ymca',
+                            name: 'Test YMCA',
+                            totalPoints: 45,
+                            maxPoints: 80,
+                            percentageScore: 56.25,
+                            supportDesignation: 'Standard Support',
+                            operationalTotalPoints: 25,
+                            financialTotalPoints: 20
+                        }
+                    };
+                    
+                    log('✅ Test data set', 'success');
+                    
+                    // Test the generate analysis
+                    if (aiIntegration.aiAdvisoryUI) {
+                        log('🔘 Testing generate analysis...', 'info');
+                        await aiIntegration.aiAdvisoryUI.generateAnalysis();
+                        log('✅ Generate analysis completed successfully!', 'success');
+                    } else {
+                        log('❌ AI Advisory UI not available', 'error');
+                    }
+                } else {
+                    log('❌ AI Advisory Integration not available', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+
+        // Test event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Page loaded, setting up test...', 'info');
+            
+            const generateBtn = document.getElementById('generate-analysis-btn');
+            const refreshBtn = document.getElementById('refresh-analysis-btn');
+            
+            if (generateBtn) {
+                generateBtn.addEventListener('click', async () => {
+                    log('🔘 Generate button clicked!', 'info');
+                    await testFallbackMode();
+                });
+                log('✅ Generate button event listener attached', 'success');
+            }
+            
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    log('🔘 Refresh button clicked!', 'info');
+                    const contentArea = document.getElementById('advisory-content');
+                    contentArea.innerHTML = `
+                        <div class="advisory-placeholder">
+                            <p>Click "Generate AI Analysis" to test fallback mode on first attempt.</p>
+                        </div>
+                    `;
+                    log('✅ Content refreshed', 'success');
+                });
+                log('✅ Refresh button event listener attached', 'success');
+            }
+        });
+    </script>
+</body>
+</html>

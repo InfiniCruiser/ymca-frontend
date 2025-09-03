@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Advisory Simple Test</title>
+</head>
+<body>
+    <h1>AI Advisory Simple Test</h1>
+    <p>This page tests if the AI Advisory scripts can load and execute.</p>
+    
+    <div id="status">Loading...</div>
+    
+    <!-- Test each script individually -->
+    <script>
+        console.log('🚀 Test page loaded');
+        document.getElementById('status').textContent = 'Page loaded, testing scripts...';
+    </script>
+    
+    <script src="ai-advisory-framework.js"></script>
+    <script>
+        console.log('✅ Framework script loaded');
+        document.getElementById('status').textContent = 'Framework loaded, testing config manager...';
+    </script>
+    
+    <script src="ai-config-manager.js"></script>
+    <script>
+        console.log('✅ Config manager script loaded');
+        document.getElementById('status').textContent = 'Config manager loaded, testing UI...';
+    </script>
+    
+    <script src="ai-advisory-ui.js"></script>
+    <script>
+        console.log('✅ UI script loaded');
+        document.getElementById('status').textContent = 'UI loaded, testing integration...';
+    </script>
+    
+    <script src="ai-advisory-integration.js"></script>
+    <script>
+        console.log('✅ Integration script loaded');
+        document.getElementById('status').textContent = 'All scripts loaded successfully!';
+        
+        // Test if classes are available
+        if (typeof AIAdvisoryIntegration !== 'undefined') {
+            console.log('✅ AIAdvisoryIntegration class available');
+        } else {
+            console.log('❌ AIAdvisoryIntegration class NOT available');
+        }
+        
+        if (typeof AIConfigManager !== 'undefined') {
+            console.log('✅ AIConfigManager class available');
+        } else {
+            console.log('❌ AIConfigManager class NOT available');
+        }
+    </script>
+</body>
+</html>

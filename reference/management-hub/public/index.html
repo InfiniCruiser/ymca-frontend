@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUSA Organizational Excellence Assessment Dashboard</title>
+    <link rel="stylesheet" href="color-palettes.css">
+    <link rel="stylesheet" href="ymca-logos.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="ai-advisory-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body data-color-set="2">
+    <div id="app">
+        <!-- Color Palette Selector -->
+        <!-- <div class="color-palette-selector">
+            <h3>Color Theme</h3>
+            <div class="palette-options">
+                <div class="palette-option" data-set="1">
+                    <div class="palette-logo ymca-logo-set-1"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Red + Orange</span>
+                </div>
+                <div class="palette-option active" data-set="2">
+                    <div class="palette-logo ymca-logo-set-2"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Teal + Blue</span>
+                </div>
+                <div class="palette-option" data-set="3">
+                    <div class="palette-logo ymca-logo-set-3"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Yellow + Teal</span>
+                </div>
+                <div class="palette-option" data-set="4">
+                    <div class="palette-logo ymca-logo-set-4"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Blue + Purple</span>
+                </div>
+                <div class="palette-option" data-set="5">
+                    <div class="palette-logo ymca-logo-set-5"></div>
+                    <div class="palette-preview"></div>
+                    <span class="palette-label">Purple + Red</span>
+                </div>
+            </div>
+        </div> -->
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="ymca-logo-container">
+                    <div class="ymca-logo-set-2" id="current-logo"></div>
+                </div>
+                <div class="logo-section">
+                    <h1 class="main-title">OEA Management Hub</h1>
+                    <p class="subtitle">Organizational Excellence Assessment</p>
+                </div>
+                <div class="ymca-selector">
+                    <label for="ymca-select">Select YMCA:</label>
+                    <select id="ymca-select">
+                        <option value="xyz">XYZ YMCA</option>
+                        <option value="stlouis">St. Louis Y</option>
+                        <option value="charlotte">Charlotte Y</option>
+                        <option value="la">LA Y</option>
+                        <option value="chicago">Chicago Y</option>
+                        <option value="miami">Miami Y</option>
+                        <option value="seattle">Seattle Y</option>
+                        <option value="boston">Boston Y</option>
+                        <option value="denver">Denver Central Y</option>
+                        <option value="buffalo">Buffalo Central Y</option>
+                        <option value="columbus">Columbus Y</option>
+                        <option value="cleveland">Cleveland Central Y</option>
+                        <option value="philadelphia">Philadelphia Y</option>
+                        <option value="knoxville">Knoxville Y</option>
+                        <option value="tacoma">Tacoma Y</option>
+                    </select>
+                    <button class="overview-btn" id="network-overview-btn" onclick="goToNetworkOverview()">
+                        <i class="fas fa-th-large"></i>
+                        Hub Overview
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- Unified Performance Dashboard -->
+            <section class="unified-performance-dashboard">
+                <div class="dashboard-panel">
+                    <h2>Performance Dashboard</h2>
+                    <div class="dashboard-content">
+                        <!-- Overview Stats Row -->
+                        <div class="overview-stats-row">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Points</span>
+                                <span class="stat-value">
+                                    <span id="total-points">32</span>
+                                    <span class="stat-max">/ 80</span>
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Operational</span>
+                                <span class="stat-value">
+                                    <span id="operational-score">28</span>
+                                    <span class="stat-max">/ 40</span>
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Financial</span>
+                                <span class="stat-value">
+                                    <span id="financial-score">6</span>
+                                    <span class="stat-max">/ 40</span>
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Members</span>
+                                <span class="stat-value member-count" id="member-count">
+                                    <i class="fas fa-users member-icon"></i>
+                                    <span id="member-number">2,500</span>
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Support Level</span>
+                                <span class="support-badge" id="support-designation">Y-USA Support</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Performance Metrics Row -->
+                        <div class="performance-metrics-row">
+                            <!-- Operational Metrics -->
+                            <div class="metrics-section operational">
+                                <h3 class="section-title">Operational Performance</h3>
+                                <div class="metrics-list" id="operational-metrics">
+                                    <!-- Metrics will be populated by JavaScript -->
+                                </div>
+                                <div class="section-summary">
+                                    <span class="support-badge independent">Independent Improvement</span>
+                                </div>
+                            </div>
+
+                            <!-- Financial Metrics -->
+                            <div class="metrics-section financial">
+                                <h3 class="section-title">Financial Performance</h3>
+                                <div class="metrics-list" id="financial-metrics">
+                                    <!-- Metrics will be populated by JavaScript -->
+                                </div>
+                                <div class="section-summary">
+                                    <span class="support-badge yusa">Y-USA Support</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Advisory Insights -->
+            <section class="ai-advisory-insights" id="ai-advisory-section">
+                <!-- AI Advisory content will be injected by JavaScript -->
+            </section>
+
+            <!-- Suggested Resources -->
+            <section class="suggested-resources">
+                <h2>Suggested Resources</h2>
+                <div class="resources-container">
+                    <div class="resources-header">
+                        <div class="resource-column">
+                            <h4>Metric</h4>
+                        </div>
+                        <div class="resource-column">
+                            <h4>AI Analysis</h4>
+                        </div>
+                        <div class="resource-column">
+                            <h4>Self Directed</h4>
+                        </div>
+                        <div class="resource-column">
+                            <h4>Network Supported</h4>
+                            <div class="sub-columns">
+                                <span>Direct Delivery</span>
+                                <span>Shared Services</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="resources-content" id="resources-content">
+                        <!-- Resources will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Performance Scale -->
+            <section class="performance-scale">
+                <div class="scale-container">
+                    <span class="scale-label">Low Performance</span>
+                    <div class="scale-bar">
+                        <div class="scale-gradient"></div>
+                    </div>
+                    <span class="scale-label">High Performance</span>
+                </div>
+            </section>
+        </main>
+
+        <!-- Drill-down Modal -->
+        <div id="drill-down-modal" class="modal" tabindex="-1">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title">Metric Details</h2>
+                    <button class="close-btn" id="close-modal">&times;</button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Modal content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Overview Modal -->
+        <div id="metrics-modal" class="modal" tabindex="-1">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2>OEA Metrics Overview</h2>
+                    <button class="close-btn" id="close-metrics-modal">&times;</button>
+                </div>
+                <div class="modal-body" id="metrics-modal-body">
+                    <!-- Metrics overview content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI Action Plan Modal -->
+        <div id="action-plan-modal" class="modal" style="display: none;">
+            <div class="modal-content action-plan-modal">
+                <div class="modal-header">
+                    <h2>AI Advisor Action Plan</h2>
+                    <button class="close-btn" id="close-action-plan">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="action-plan-content">
+                        <div class="advisor-input-section">
+                            <h3>📊 Current Metric Analysis</h3>
+                            <div id="metric-analysis-display"></div>
+                        </div>
+                        
+                        <div class="advisor-recommendations">
+                            <h3>🎯 AI Recommendations</h3>
+                            <div id="ai-recommendations"></div>
+                        </div>
+                        
+                        <div class="action-timeline">
+                            <h3>📅 Action Timeline</h3>
+                            <div class="timeline-sections">
+                                <div class="timeline-section immediate">
+                                    <h4>🚨 Immediate Actions (0-30 days)</h4>
+                                    <div id="immediate-actions"></div>
+                                </div>
+                                <div class="timeline-section short-term">
+                                    <h4>📈 Short-term Goals (1-6 months)</h4>
+                                    <div id="short-term-actions"></div>
+                                </div>
+                                <div class="timeline-section long-term">
+                                    <h4>🎯 Long-term Strategy (6-12 months)</h4>
+                                    <div id="long-term-actions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="success-metrics">
+                            <h3>📊 Success Metrics</h3>
+                            <div id="success-metrics"></div>
+                        </div>
+                        
+                        <div class="action-plan-actions">
+                            <button class="btn-primary" id="export-action-plan">
+                                📄 Export Plan
+                            </button>
+                            <button class="btn-secondary" id="share-action-plan">
+                                📤 Share with Team
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMTIwIDQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8dGV4dCB4PSI2MCIgeT0iMjUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzMzMyIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R3JhbnQgVGhvcm50b248L3RleHQ+Cjwvc3ZnPgo=" alt="Grant Thornton" class="footer-logo">
+            </div>
+            <div class="footer-center">
+                <span class="draft-badge">INTERNAL USE ONLY</span>
+            </div>
+            <div class="footer-right">
+                <p class="copyright">© 2025 DW Capital LLC | All rights reserved | on behalf of Y USA</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Advisory System -->
+    <script src="ai-advisory-framework.js"></script>
+    <script src="ai-config-manager.js"></script>
+    <script src="ai-advisory-ui.js"></script>
+    <script src="ai-advisory-integration.js"></script>
+    
+    <!-- Main Application -->
+    <script src="api-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html> 

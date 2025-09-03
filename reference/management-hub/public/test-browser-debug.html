@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Advisory Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .status.loading { background: #fff3cd; border: 1px solid #ffeaa7; }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <h1》AI Advisory Debug Test</h1>
+    
+    <div class="debug-section">
+        <h3>Test Controls</h3>
+        <button id="test-config-btn">Test Config Manager</button>
+        <button id="test-advisor-btn">Test Advisor Manager</button>
+        <button id="test-integration-btn">Test Full Integration</button>
+        <button id="clear-logs-btn">Clear Logs</button>
+    </div>
+    
+    <div class="debug-section">
+        <h3>System Status</h3>
+        <div id="system-status"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Console Output</h3>
+        <div id="console-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Test Results</h3>
+        <div id="test-results"></div>
+    </div>
+
+    <!-- Load AI Advisory scripts -->
+    <script src="ai-advisory-framework.js"></script>
+    <script src="ai-config-manager.js"></script>
+    <script src="ai-advisory-ui.js"></script>
+    <script src="ai-advisory-integration.js"></script>
+    
+    <script>
+        // Override console.log to capture output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(type, message, ...args) {
+            const output = document.getElementById('console-output');
+            const div = document.createElement('div');
+            div.className = type;
+            
+            let text = message;
+            if (args.length > 0) {
+                text += ' ' + args.map(arg => {
+                    if (typeof arg === 'object') {
+                        try {
+                            return JSON.stringify(arg, null, 2);
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }
+                    return String(arg);
+                }).join(' ');
+            }
+            
+            div.textContent = `[${new Date().toLocaleTimeString()}] [${type.toUpperCase()}] ${text}`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        console.log = (...args) => {
+            originalLog(...args);
+            addToConsole('info', ...args);
+        };
+        
+        console.error = (...args) => {
+            originalError(...args);
+            addToConsole('error', ...args);
+        };
+        
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addToConsole('warn', ...args);
+        };
+        
+        function addResult(title, content, isError = false) {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = isError ? 'error' : 'success';
+            
+            let contentStr;
+            try {
+                contentStr = typeof content === 'object' ? JSON.stringify(content, null, 2) : String(content);
+            } catch (e) {
+                contentStr = String(content);
+            }
+            
+            div.innerHTML = `<h4>${title}</h4><pre>${contentStr}</pre>`;
+            results.appendChild(div);
+        }
+        
+        function updateSystemStatus(message, type = 'info') {
+            const status = document.getElementById('system-status');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            status.appendChild(div);
+        }
+        
+        async function testConfigManager() {
+            try {
+                updateSystemStatus('Testing Config Manager...', 'loading');
+                console.log('🧪 Testing Config Manager...');
+                
+                const configManager = new AIConfigManager();
+                console.log('✅ Config Manager created');
+                
+                await configManager.init();
+                console.log('✅ Config Manager initialized');
+                
+                const status = configManager.getStatus();
+                const summary = configManager.getConfigSummary();
+                
+                addResult('Config Manager Status', status);
+                addResult('Config Summary', summary);
+                
+                updateSystemStatus('Config Manager test completed', 'success');
+                console.log('✅ Config Manager test completed');
+                
+            } catch (error) {
+                updateSystemStatus('Config Manager test failed', 'error');
+                console.error('❌ Config Manager test failed:', error);
+                addResult('Config Manager Error', {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack
+                }, true);
+            }
+        }
+        
+        async function testAdvisorManager() {
+            try {
+                updateSystemStatus('Testing Advisor Manager...', 'loading');
+                console.log('🧪 Testing Advisor Manager...');
+                
+                const config = {
+                    azureOpenAI: {
+                        endpoint: 'https://taalk-ai.openai.azure.com',
+                        deployment: 'Prod4',
+                        apiVersion: '2024-02-15-preview',
+                        model: 'gpt-4'
+                    },
+                    useSecureAPI: true
+                };
+                
+                console.log('🔧 Creating AdvisorManager with config:', config);
+                
+                const advisorManager = new AdvisorManager(config);
+                console.log('✅ AdvisorManager created');
+                
+                await advisorManager.init();
+                console.log('✅ AdvisorManager initialized');
+                
+                const hasProvider = !!advisorManager.provider;
+                const advisorCount = advisorManager.registry.getAllAdvisors().length;
+                
+                addResult('Advisor Manager Test', {
+                    hasProvider,
+                    providerType: advisorManager.provider ? advisorManager.provider.constructor.name : 'None',
+                    advisorCount,
+                    config: config
+                });
+                
+                updateSystemStatus('Advisor Manager test completed', 'success');
+                console.log('✅ Advisor Manager test completed');
+                
+            } catch (error) {
+                updateSystemStatus('Advisor Manager test failed', 'error');
+                console.error('❌ Advisor Manager test failed:', error);
+                addResult('Advisor Manager Error', {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack
+                }, true);
+            }
+        }
+        
+        async function testFullIntegration() {
+            try {
+                updateSystemStatus('Testing Full Integration...', 'loading');
+                console.log('🧪 Testing Full Integration...');
+                
+                // Don't create a new integration if one already exists
+                let integration;
+                if (window.aiAdvisoryIntegration) {
+                    console.log('Using existing integration instance');
+                    integration = window.aiAdvisoryIntegration;
+                } else {
+                    console.log('Creating new integration instance');
+                    integration = new AIAdvisoryIntegration();
+                    await integration.init();
+                }
+                
+                const status = integration.getStatus ? integration.getStatus() : 'No getStatus method';
+                addResult('Full Integration Status', status);
+                
+                updateSystemStatus('Full Integration test completed', 'success');
+                console.log('✅ Full Integration test completed');
+                
+            } catch (error) {
+                updateSystemStatus('Full Integration test failed', 'error');
+                console.error('❌ Full Integration test failed:', error);
+                addResult('Full Integration Error', {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack
+                }, true);
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('console-output').innerHTML = '';
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('system-status').innerHTML = '';
+            updateSystemStatus('Logs cleared', 'info');
+        }
+        
+        // Setup event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listeners to buttons
+            document.getElementById('test-config-btn').addEventListener('click', testConfigManager);
+            document.getElementById('test-advisor-btn').addEventListener('click', testAdvisorManager);
+            document.getElementById('test-integration-btn').addEventListener('click', testFullIntegration);
+            document.getElementById('clear-logs-btn').addEventListener('click', clearLogs);
+            
+            console.log('🚀 AI Advisory Debug Test Page Loaded');
+            updateSystemStatus('Debug page initialized', 'success');
+            
+            console.log('Available classes:', {
+                AIConfigManager: typeof AIConfigManager,
+                AdvisorManager: typeof AdvisorManager,
+                AIAdvisoryIntegration: typeof AIAdvisoryIntegration,
+                AzureOpenAIProvider: typeof AzureOpenAIProvider
+            });
+            
+            // Show existing integration status if any
+            if (window.aiAdvisoryIntegration) {
+                updateSystemStatus('AI Advisory Integration already loaded', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

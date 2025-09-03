@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YMCA Network Analytics - Map View</title>
+    <link rel="stylesheet" href="color-palettes.css">
+    <link rel="stylesheet" href="ymca-logos.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="map-view-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-color-set="2">
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="ymca-logo-container">
+                    <div class="ymca-logo-set-2" id="current-logo"></div>
+                </div>
+                <div class="logo-section">
+                    <h1 class="main-title">YMCA Network Analytics</h1>
+                    <p class="subtitle">Faceted Analytics & Geographic Distribution</p>
+                </div>
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="window.location.href='/'">
+                        <i class="fas fa-chart-bar"></i>
+                        Dashboard
+                    </button>
+                    <button class="nav-btn" onclick="window.location.href='overview.html'">
+                        <i class="fas fa-th-large"></i>
+                        Overview
+                    </button>
+                    <button class="nav-btn active" onclick="window.location.href='map-view.html'">
+                        <i class="fas fa-map-marked-alt"></i>
+                        Map View
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Analytics Controls -->
+        <div class="analytics-controls">
+            <div class="control-group">
+                <label for="view-selector">View:</label>
+                <select id="view-selector">
+                    <option value="map">Geographic Map</option>
+                    <option value="facets">Faceted Analytics</option>
+                    <option value="timeline">Timeline Analysis</option>
+                    <option value="distribution">Distribution Charts</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="filter-selector">Filter:</label>
+                <select id="filter-selector">
+                    <option value="all">All YMCAs</option>
+                    <option value="by-age">By Age (Charter Date)</option>
+                    <option value="by-region">By Region</option>
+                    <option value="by-type">By Type</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button id="refresh-data" class="refresh-btn">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="analytics-main">
+            <!-- Map View -->
+            <div id="map-view" class="view-section active">
+                <div class="map-container">
+                    <div id="ymca-map">
+                        <div id="map-loading" style="display: flex; align-items: center; justify-content: center; height: 600px; background: #f8f9fa; color: #666;">
+                            <div style="text-align: center;">
+                                <div class="spinner" style="margin: 0 auto 1rem;"></div>
+                                <p>Loading YMCA Map...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="map-legend">
+                        <h3>Legend</h3>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #e74c3c;"></span>
+                            <span>Established 1850-1900</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #f39c12;"></span>
+                            <span>Established 1901-1950</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #3498db;"></span>
+                            <span>Established 1951-2000</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #2ecc71;"></span>
+                            <span>Established 2001+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Faceted Analytics View -->
+            <div id="facets-view" class="view-section">
+                <div class="facets-grid">
+                    <div class="facet-card">
+                        <h3>Age Distribution</h3>
+                        <canvas id="age-chart"></canvas>
+                    </div>
+                    <div class="facet-card">
+                        <h3>Geographic Distribution</h3>
+                        <canvas id="geo-chart"></canvas>
+                    </div>
+                    <div class="facet-card">
+                        <h3>Charter Timeline</h3>
+                        <canvas id="timeline-chart"></canvas>
+                    </div>
+                    <div class="facet-card">
+                        <h3>Organization Types</h3>
+                        <canvas id="type-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Analysis View -->
+            <div id="timeline-view" class="view-section">
+                <div class="timeline-container">
+                    <h3>YMCA Establishment Timeline</h3>
+                    <div id="timeline-chart-container">
+                        <canvas id="timeline-analysis-chart"></canvas>
+                    </div>
+                    <div class="timeline-stats">
+                        <div class="stat-card">
+                            <h4>Oldest YMCA</h4>
+                            <p id="oldest-ymca">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Newest YMCA</h4>
+                            <p id="newest-ymca">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Average Age</h4>
+                            <p id="avg-age">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Total YMCAs</h4>
+                            <p id="total-count">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distribution Charts View -->
+            <div id="distribution-view" class="view-section">
+                <div class="distribution-grid">
+                    <div class="dist-card">
+                        <h3>Decade Distribution</h3>
+                        <canvas id="decade-chart"></canvas>
+                    </div>
+                    <div class="dist-card">
+                        <h3>Century Distribution</h3>
+                        <canvas id="century-chart"></canvas>
+                    </div>
+                    <div class="dist-card">
+                        <h3>Geographic Clusters</h3>
+                        <div id="cluster-analysis"></div>
+                    </div>
+                    <div class="dist-card">
+                        <h3>Data Completeness</h3>
+                        <canvas id="completeness-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Data Table -->
+        <div class="data-table-section">
+            <h3>YMCA Network Data</h3>
+            <div class="table-controls">
+                <input type="text" id="search-input" placeholder="Search YMCAs...">
+                <select id="sort-select">
+                    <option value="name">Sort by Name</option>
+                    <option value="charterDate">Sort by Charter Date</option>
+                    <option value="associationNumber">Sort by Association Number</option>
+                </select>
+            </div>
+            <div class="table-container">
+                <table id="ymca-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Association #</th>
+                            <th>Charter Date</th>
+                            <th>Age (Years)</th>
+                            <th>Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="api-service.js"></script>
+    <script src="map-view.js"></script>
+</body>
+</html>

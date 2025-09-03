@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Script Loading Test</title>
+</head>
+<body>
+    <h1>AI Script Loading Test</h1>
+    <div id="status"></div>
+    
+    <script>
+        console.log('🚀 Starting script loading test...');
+        
+        // Test function to check if classes are available
+        function testClasses() {
+            const status = document.getElementById('status');
+            const results = [];
+            
+            // Test each class
+            if (typeof window.AdvisorManager !== 'undefined') {
+                results.push('✅ AdvisorManager: LOADED');
+                console.log('✅ AdvisorManager class found:', window.AdvisorManager);
+            } else {
+                results.push('❌ AdvisorManager: NOT FOUND');
+                console.error('❌ AdvisorManager class not found');
+            }
+            
+            if (typeof window.AzureOpenAIProvider !== 'undefined') {
+                results.push('✅ AzureOpenAIProvider: LOADED');
+                console.log('✅ AzureOpenAIProvider class found:', window.AzureOpenAIProvider);
+            } else {
+                results.push('❌ AzureOpenAIProvider: NOT FOUND');
+                console.error('❌ AzureOpenAIProvider class not found');
+            }
+            
+            if (typeof window.BaseAdvisor !== 'undefined') {
+                results.push('✅ BaseAdvisor: LOADED');
+                console.log('✅ BaseAdvisor class found:', window.BaseAdvisor);
+            } else {
+                results.push('❌ BaseAdvisor: NOT FOUND');
+                console.error('❌ BaseAdvisor class not found');
+            }
+            
+            if (typeof window.AdvisorRegistry !== 'undefined') {
+                results.push('✅ AdvisorRegistry: LOADED');
+                console.log('✅ AdvisorRegistry class found:', window.AdvisorRegistry);
+            } else {
+                results.push('❌ AdvisorRegistry: NOT FOUND');
+                console.error('❌ AdvisorRegistry class not found');
+            }
+            
+            // Display results
+            status.innerHTML = results.join('<br>');
+            
+            // Test creating instances
+            try {
+                if (typeof window.AdvisorManager !== 'undefined') {
+                    console.log('🧪 Testing AdvisorManager instantiation...');
+                    const testManager = new window.AdvisorManager({});
+                    console.log('✅ AdvisorManager instantiation successful:', testManager);
+                }
+            } catch (error) {
+                console.error('❌ AdvisorManager instantiation failed:', error);
+            }
+        }
+        
+        // Wait for all scripts to load
+        window.addEventListener('load', () => {
+            console.log('📄 Window load event fired');
+            setTimeout(testClasses, 100); // Small delay to ensure scripts are processed
+        });
+        
+        // Also test when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📄 DOMContentLoaded event fired');
+            setTimeout(testClasses, 100);
+        });
+    </script>
+    
+    <!-- Load AI Advisory scripts in order -->
+    <script src="ai-advisory-framework.js"></script>
+    <script src="ai-config-manager.js"></script>
+    <script src="ai-advisory-ui.js"></script>
+    <script src="ai-advisory-integration.js"></script>
+    
+    <script>
+        console.log('📜 All script tags processed');
+        // Test immediately after scripts are processed
+        setTimeout(testClasses, 50);
+    </script>
+</body>
+</html>

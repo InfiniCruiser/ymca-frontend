@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Framework File Content</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .file-content { 
+            background: #f5f5f5; 
+            padding: 20px; 
+            border-radius: 5px; 
+            white-space: pre-wrap; 
+            font-family: monospace; 
+            font-size: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        button { 
+            padding: 10px 20px; 
+            margin: 10px 5px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+        }
+        button:hover { background: #0056b3; }
+        .line-highlight { background: yellow; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Framework File Content Test</h1>
+        <p>This page fetches and displays the actual content of the ai-advisory-framework.js file being served by the browser.</p>
+        
+        <button onclick="fetchFileContent()">Fetch File Content</button>
+        <button onclick="checkLine102()">Check Line 102 (Error Location)</button>
+        <button onclick="clearContent()">Clear Content</button>
+        
+        <div id="status"></div>
+        <div id="content" class="file-content"></div>
+    </div>
+
+    <script>
+        async function fetchFileContent() {
+            const statusDiv = document.getElementById('status');
+            const contentDiv = document.getElementById('content');
+            
+            statusDiv.innerHTML = '<p>Fetching file content...</p>';
+            contentDiv.textContent = '';
+            
+            try {
+                // Try different possible paths
+                const paths = [
+                    '/ai-framework/ai-advisory-framework.js',
+                    '/ai-advisory-framework.js',
+                    '/public/ai-framework/ai-advisory-framework.js'
+                ];
+                
+                let content = null;
+                let usedPath = null;
+                
+                for (const path of paths) {
+                    try {
+                        console.log(`Trying path: ${path}`);
+                        const response = await fetch(path);
+                        if (response.ok) {
+                            content = await response.text();
+                            usedPath = path;
+                            break;
+                        }
+                    } catch (e) {
+                        console.log(`Failed to fetch ${path}:`, e);
+                    }
+                }
+                
+                if (content) {
+                    statusDiv.innerHTML = `<p class="success">✅ File fetched successfully from: ${usedPath}</p>`;
+                    contentDiv.textContent = content;
+                } else {
+                    statusDiv.innerHTML = '<p class="error">❌ Could not fetch file from any path</p>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<p class="error">❌ Error fetching file: ${error.message}</p>`;
+                console.error('Error:', error);
+            }
+        }
+        
+        function checkLine102() {
+            const contentDiv = document.getElementById('content');
+            const content = contentDiv.textContent;
+            
+            if (!content) {
+                document.getElementById('status').innerHTML = '<p class="error">❌ No content loaded. Fetch file first.</p>';
+                return;
+            }
+            
+            const lines = content.split('\n');
+            if (lines.length >= 102) {
+                const line102 = lines[101]; // 0-indexed
+                const statusDiv = document.getElementById('status');
+                
+                statusDiv.innerHTML = `
+                    <h3>Line 102 Analysis:</h3>
+                    <p><strong>Content:</strong> ${line102}</p>
+                    <p><strong>Has throw new Error:</strong> ${line102.includes('throw new Error') ? '❌ YES - OLD VERSION' : '✅ NO - UPDATED VERSION'}</p>
+                    <p><strong>Has generateFallbackAnalysis:</strong> ${line102.includes('generateFallbackAnalysis') ? '✅ YES - UPDATED VERSION' : '❌ NO - OLD VERSION'}</p>
+                `;
+                
+                // Highlight the line in the content
+                contentDiv.innerHTML = content.split('\n').map((line, index) => {
+                    if (index === 101) {
+                        return `<div class="line-highlight">${index + 1}: ${line}</div>`;
+                    }
+                    return `${index + 1}: ${line}`;
+                }).join('\n');
+            } else {
+                document.getElementById('status').innerHTML = '<p class="error">❌ File has fewer than 102 lines</p>';
+            }
+        }
+        
+        function clearContent() {
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('content').textContent = '';
+        }
+        
+        // Auto-fetch on page load
+        window.addEventListener('load', () => {
+            setTimeout(fetchFileContent, 1000);
+        });
+    </script>
+</body>
+</html>
