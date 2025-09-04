@@ -141,14 +141,44 @@ export default function TestLinksPage() {
     });
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string) => {
+    try {
+      // Try the modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      
+      // Fallback for older browsers or non-secure contexts
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+        // Show user-friendly error message
+        alert('Failed to copy to clipboard. Please copy the link manually.');
+        return;
+      }
+      
+      document.body.removeChild(textArea);
+    } catch (err) {
+      console.error('Clipboard error: ', err);
+      alert('Failed to copy to clipboard. Please copy the link manually.');
+    }
   };
 
-  const copyAllLinks = () => {
+  const copyAllLinks = async () => {
     const links = generateTestLinks();
     const linkText = links.map(link => `${link.name} (${link.city}, ${link.state}): ${link.url}`).join('\n');
-    copyToClipboard(linkText);
+    await copyToClipboard(linkText);
   };
 
   if (loading) {
@@ -316,7 +346,7 @@ export default function TestLinksPage() {
                     Generated Test Links ({testLinks.length})
                   </h2>
                   <button
-                    onClick={copyAllLinks}
+                    onClick={() => copyAllLinks()}
                     className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors"
                   >
                     Copy All Links
