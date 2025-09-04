@@ -6,13 +6,17 @@ import { toast } from 'react-hot-toast';
 import { PeriodSurvey } from '@/components/survey/period-survey';
 import { SubmissionModal } from '@/components/submissions/submission-modal';
 import { useDashboardStats } from '@/hooks/use-dashboard-stats';
+import { useAuthContext } from '@/contexts/auth-context';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { testAuth, setTestAuth } = useAuthContext();
   const [isSurveyOpen, setIsSurveyOpen] = useState(false);
   const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
   const [activeColorSet, setActiveColorSet] = useState('2'); // Default to Teal + Blue
-  const [selectedOrganization, setSelectedOrganization] = useState('f357cb0b-b881-4166-8516-1c0783d4a5a2'); // Hard-coded to Duluth Area Family YMCA
+  
+  // Use test organization ID if in test mode, otherwise use default
+  const selectedOrganization = testAuth?.organizationId || 'f357cb0b-b881-4166-8516-1c0783d4a5a2';
   
   // Fetch real dashboard stats for the selected organization
   const { data: dashboardStats, isLoading: statsLoading, error: statsError } = useDashboardStats(selectedOrganization);
@@ -76,6 +80,11 @@ export default function DashboardPage() {
 
   // Get organization name for display
   const getOrganizationName = (orgId: string) => {
+    // If in test mode, use the test organization name
+    if (testAuth?.isTestMode && testAuth.organizationId === orgId) {
+      return testAuth.organizationName;
+    }
+    
     const orgMap: Record<string, string> = {
       'f357cb0b-b881-4166-8516-1c0783d4a5a2': 'Duluth Area Family YMCA',
       '183460b3-2124-416c-8642-452f68f348a7': 'Charlotte YMCA',
@@ -107,11 +116,64 @@ export default function DashboardPage() {
             <div className="ymca-selector">
               <label>YMCA:</label>
               <div className="selected-ymca">
-                <strong>Duluth Area Family YMCA</strong>
+                <strong>{getOrganizationName(selectedOrganization)}</strong>
+                {testAuth?.isTestMode && (
+                  <div style={{
+                    marginTop: '4px',
+                    padding: '2px 8px',
+                    backgroundColor: '#fef3c7',
+                    border: '1px solid #f59e0b',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    color: '#92400e',
+                    fontWeight: '600'
+                  }}>
+                    🧪 TEST MODE
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </header>
+
+        {/* Test Mode Banner */}
+        {testAuth?.isTestMode && (
+          <div style={{
+            backgroundColor: '#fef3c7',
+            border: '1px solid #f59e0b',
+            padding: '12px 24px',
+            margin: '0 24px',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '16px' }}>🧪</span>
+              <div>
+                <strong style={{ color: '#92400e' }}>Test Mode Active</strong>
+                <p style={{ margin: '0', fontSize: '14px', color: '#92400e' }}>
+                  You are testing as <strong>{testAuth.organizationName}</strong>
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setTestAuth(null)}
+              style={{
+                backgroundColor: '#f59e0b',
+                color: 'white',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              Exit Test Mode
+            </button>
+          </div>
+        )}
 
         {/* Main Dashboard */}
         <div className="dashboard">
