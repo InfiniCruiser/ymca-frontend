@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useState } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 
 interface TestAuth {
@@ -24,6 +24,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const [testAuth, setTestAuth] = useState<TestAuth | null>(null);
+
+  // Load test auth from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedTestAuth = localStorage.getItem('ymca_test_auth');
+      if (savedTestAuth) {
+        const parsedTestAuth = JSON.parse(savedTestAuth);
+        setTestAuth(parsedTestAuth);
+      }
+    } catch (error) {
+      console.error('Error loading test auth from localStorage:', error);
+    }
+  }, []);
+
+  // Save test auth to localStorage whenever it changes
+  useEffect(() => {
+    if (testAuth) {
+      try {
+        localStorage.setItem('ymca_test_auth', JSON.stringify(testAuth));
+      } catch (error) {
+        console.error('Error saving test auth to localStorage:', error);
+      }
+    } else {
+      try {
+        localStorage.removeItem('ymca_test_auth');
+      } catch (error) {
+        console.error('Error removing test auth from localStorage:', error);
+      }
+    }
+  }, [testAuth]);
 
   const contextValue = {
     ...auth,
