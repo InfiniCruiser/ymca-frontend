@@ -25,6 +25,9 @@ export async function GET(
 
     const data = await response.json();
     
+    console.log('📊 Backend response data:', data);
+    console.log('📊 Backend response type:', typeof data);
+    console.log('📊 Backend response keys:', data ? Object.keys(data) : 'No data');
     console.log('✅ Performance calculation fetched successfully for submission:', submissionId);
 
     return NextResponse.json({

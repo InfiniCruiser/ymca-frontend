@@ -92,6 +92,9 @@ export default function AnalyticsPage() {
           data = result.performanceCalculation;
         }
 
+        console.log('📊 Raw data received from backend:', data);
+        console.log('📊 Data type:', typeof data);
+        console.log('📊 Data keys:', data ? Object.keys(data) : 'No data');
         setOrganizationData(data);
       } catch (err) {
         console.error('Error loading participant data:', err);
