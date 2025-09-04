@@ -65,7 +65,6 @@ export default function AnalyticsPage() {
         setIsLoading(true);
         setError(null);
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ymca-backend-c1a73b2f2522.herokuapp.com';
         let response;
         let data;
 
@@ -81,14 +80,16 @@ export default function AnalyticsPage() {
           const result = await response.json();
           data = result.performanceCalculation;
         } else {
-          // Fetch latest organization performance data (existing behavior)
-          response = await fetch(`${backendUrl}/api/v1/performance-calculations/organization/${participantOrgId}/latest`);
+          // Fetch latest organization performance data using API proxy
+          console.log('Fetching latest performance data for organization:', participantOrgId);
+          response = await fetch(`/api/performance-calculations/organization/${participantOrgId}/latest`);
           
           if (!response.ok) {
             throw new Error('Failed to load organization data');
           }
 
-          data = await response.json();
+          const result = await response.json();
+          data = result.performanceCalculation;
         }
 
         setOrganizationData(data);
