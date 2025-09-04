@@ -23,7 +23,34 @@ export async function GET(
       throw new Error(`Backend performance calculation fetch error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    // Check if response has content before trying to parse JSON
+    const responseText = await response.text();
+    console.log('📊 Backend response text:', responseText);
+    console.log('📊 Backend response length:', responseText.length);
+    
+    if (!responseText || responseText.trim() === '') {
+      console.log('⚠️ Backend returned empty response for submission:', submissionId);
+      return NextResponse.json({
+        success: false,
+        error: 'No performance calculation data found for this submission',
+        submissionId: submissionId,
+        timestamp: new Date().toISOString()
+      }, { status: 404 });
+    }
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('❌ Failed to parse backend response as JSON:', parseError);
+      console.error('❌ Raw response:', responseText);
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid JSON response from backend',
+        rawResponse: responseText,
+        timestamp: new Date().toISOString()
+      }, { status: 500 });
+    }
     
     console.log('📊 Backend response data:', data);
     console.log('📊 Backend response type:', typeof data);
