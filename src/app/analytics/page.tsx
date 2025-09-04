@@ -117,6 +117,14 @@ export default function AnalyticsPage() {
         console.log('📊 Raw data received from backend:', data);
         console.log('📊 Data type:', typeof data);
         console.log('📊 Data keys:', data ? Object.keys(data) : 'No data');
+        console.log('📊 Key score values:', {
+          totalPoints: data?.totalPoints,
+          percentageScore: data?.percentageScore,
+          membershipGrowthScore: data?.membershipGrowthScore,
+          staffRetentionScore: data?.staffRetentionScore,
+          operationalTotalPoints: data?.operationalTotalPoints,
+          financialTotalPoints: data?.financialTotalPoints
+        });
         setOrganizationData(data);
       } catch (err) {
         console.error('Error loading participant data:', err);
