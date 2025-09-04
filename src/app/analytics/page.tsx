@@ -56,7 +56,8 @@ export default function AnalyticsPage() {
         setError(null);
 
         // Fetch participant's organization performance data
-        const response = await fetch(`http://localhost:3001/api/v1/performance-calculations/organization/${participantOrgId}/latest`);
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ymca-backend-c1a73b2f2522.herokuapp.com';
+        const response = await fetch(`${backendUrl}/api/v1/performance-calculations/organization/${participantOrgId}/latest`);
         
         if (!response.ok) {
           throw new Error('Failed to load organization data');
