@@ -120,15 +120,16 @@ export default function DashboardPage() {
                 {testAuth?.isTestMode && (
                   <div style={{
                     marginTop: '4px',
-                    padding: '2px 8px',
-                    backgroundColor: '#fef3c7',
-                    border: '1px solid #f59e0b',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    color: '#92400e',
-                    fontWeight: '600'
+                    padding: '2px 6px',
+                    backgroundColor: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '3px',
+                    fontSize: '10px',
+                    color: '#64748b',
+                    fontWeight: '500',
+                    letterSpacing: '0.5px'
                   }}>
-                    🧪 TEST MODE
+                    TEST
                   </div>
                 )}
               </div>
@@ -139,38 +140,46 @@ export default function DashboardPage() {
         {/* Test Mode Banner */}
         {testAuth?.isTestMode && (
           <div style={{
-            backgroundColor: '#fef3c7',
-            border: '1px solid #f59e0b',
-            padding: '12px 24px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            padding: '8px 16px',
             margin: '0 24px',
-            borderRadius: '8px',
+            borderRadius: '6px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '16px' }}>🧪</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '12px', color: '#64748b' }}>🧪</span>
               <div>
-                <strong style={{ color: '#92400e' }}>Test Mode Active</strong>
-                <p style={{ margin: '0', fontSize: '14px', color: '#92400e' }}>
-                  You are testing as <strong>{testAuth.organizationName}</strong>
-                </p>
+                <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
+                  Test Mode: <span style={{ color: '#374151' }}>{testAuth.organizationName}</span>
+                </span>
               </div>
             </div>
             <button
               onClick={() => setTestAuth(null)}
               style={{
-                backgroundColor: '#f59e0b',
-                color: 'white',
-                border: 'none',
-                padding: '6px 12px',
+                backgroundColor: 'transparent',
+                color: '#64748b',
+                border: '1px solid #d1d5db',
+                padding: '4px 8px',
                 borderRadius: '4px',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: 'pointer'
+                fontSize: '11px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = '#f3f4f6';
+                e.target.style.borderColor = '#9ca3af';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.borderColor = '#d1d5db';
               }}
             >
-              Exit Test Mode
+              Exit
             </button>
           </div>
         )}
