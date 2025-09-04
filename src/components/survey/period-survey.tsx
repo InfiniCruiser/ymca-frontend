@@ -44,7 +44,7 @@ interface SurveyDraft {
 }
 
 export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
-  const { user } = useAuthContext();
+  const { user, testAuth } = useAuthContext();
   const [currentSection, setCurrentSection] = useState<'Risk Mitigation' | 'Governance' | 'Engagement'>('Risk Mitigation');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [responses, setResponses] = useState<Record<string, any>>({});
@@ -62,10 +62,14 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   });
 
   // Draft storage utility functions
-  const getDraftKey = useCallback(() => `ymca_survey_draft_${user?.organizationId}`, [user?.organizationId]);
+  const getDraftKey = useCallback(() => {
+    const orgId = testAuth?.organizationId || user?.organizationId;
+    return `ymca_survey_draft_${orgId}`;
+  }, [testAuth?.organizationId, user?.organizationId]);
 
   const saveDraft = useCallback(() => {
-    if (!user?.organizationId) return;
+    const orgId = testAuth?.organizationId || user?.organizationId;
+    if (!orgId) return;
     
     // Update the current section's question index before saving
     const updatedIndices = {
@@ -80,22 +84,23 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
       sectionQuestionIndices: updatedIndices,
       yusaAccessFilter,
       lastSaved: new Date().toISOString(),
-      organizationId: user.organizationId
+      organizationId: orgId
     };
     
     localStorage.setItem(getDraftKey(), JSON.stringify(draft));
     setHasDraft(true);
-  }, [user?.organizationId, responses, currentSection, currentQuestion, sectionQuestionIndices, yusaAccessFilter, getDraftKey]);
+  }, [testAuth?.organizationId, user?.organizationId, responses, currentSection, currentQuestion, sectionQuestionIndices, yusaAccessFilter, getDraftKey]);
 
   const loadDraft = useCallback((): SurveyDraft | null => {
-    if (!user?.organizationId) return null;
+    const orgId = testAuth?.organizationId || user?.organizationId;
+    if (!orgId) return null;
     
     try {
       const draftData = localStorage.getItem(getDraftKey());
       if (draftData) {
         const draft = JSON.parse(draftData) as SurveyDraft;
         // Verify the draft is for the current organization
-        if (draft.organizationId === user.organizationId) {
+        if (draft.organizationId === orgId) {
           return draft;
         }
       }
@@ -103,13 +108,14 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
       console.error('Error loading draft:', error);
     }
     return null;
-  }, [user?.organizationId, getDraftKey]);
+  }, [testAuth?.organizationId, user?.organizationId, getDraftKey]);
 
   const clearDraft = useCallback(() => {
-    if (!user?.organizationId) return;
+    const orgId = testAuth?.organizationId || user?.organizationId;
+    if (!orgId) return;
     localStorage.removeItem(getDraftKey());
     setHasDraft(false);
-  }, [user?.organizationId, getDraftKey]);
+  }, [testAuth?.organizationId, user?.organizationId, getDraftKey]);
 
   const resumeDraft = useCallback(() => {
     const draft = loadDraft();
@@ -399,7 +405,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           percentage
         },
         yusaAccessFilter,
-        organizationId: user?.organizationId, // Include organizationId from auth context
+        organizationId: testAuth?.organizationId || user?.organizationId, // Include organizationId from auth context
         submittedBy: user?.email || 'current-user',
         completed: true
       };
@@ -422,7 +428,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           score: submission.score,
           yusaAccessFilter: submission.yusaAccessFilter,
           submittedBy: user?.email || 'current-user',
-          organizationId: user?.organizationId // Get organizationId from authenticated user context
+          organizationId: testAuth?.organizationId || user?.organizationId // Get organizationId from authenticated user context
         };
         
         const response = await fetch('/api/v1/submissions', {
