@@ -11,8 +11,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: 'https://ymca-backend-c1a73b2f2522.herokuapp.com/api/:path*',
+        source: '/api/v1/:path*',
+        destination: 'https://ymca-backend-c1a73b2f2522.herokuapp.com/api/v1/:path*',
       },
     ];
   },
