@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import frameworkQuestions from '@/data/framework-questions.json';
 import { useAuthContext } from '@/contexts/auth-context';
+import { scoringService } from '@/services/scoring-service';
 
 interface Question {
   id: string;
@@ -295,23 +296,19 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   const totalQuestions = questions.length;
   const progress = totalQuestions > 0 ? ((currentQuestion + 1) / totalQuestions) * 100 : 0;
 
-  // Calculate current score
+  // Calculate current score using the new scoring service
   const calculateScore = () => {
-    let totalScore = 0;
-    let maxPossibleScore = 0;
-    
-    questions.forEach((question) => {
-      maxPossibleScore += question.score;
-      const response = responses[question.id];
-      if (response === 'Yes') {
-        totalScore += question.score;
-      }
-    });
-    
-    return { totalScore, maxPossibleScore, percentage: maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0 };
+    const allScores = scoringService.calculateAllScores(responses, questions);
+    return {
+      totalScore: allScores.operational.totalOperationalPoints,
+      maxPossibleScore: allScores.operational.maxOperationalPoints,
+      percentage: allScores.operational.maxOperationalPoints > 0 ? 
+        (allScores.operational.totalOperationalPoints / allScores.operational.maxOperationalPoints) * 100 : 0,
+      allScores // Include full scoring data for submission
+    };
   };
 
-  const { totalScore, maxPossibleScore, percentage } = calculateScore();
+  const { totalScore, maxPossibleScore, percentage, allScores } = calculateScore();
 
   const handleResponse = (questionId: string, value: any) => {
     setResponses(prev => ({
@@ -392,7 +389,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Create a submission record with metadata
+      // Create a submission record with metadata and calculated scores
       const submission = {
         id: `period_${Date.now()}`,
         timestamp: new Date().toISOString(),
@@ -404,6 +401,8 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           maxPossibleScore,
           percentage
         },
+        // Include comprehensive scoring data for backend storage
+        calculatedScores: allScores,
         yusaAccessFilter,
         organizationId: testAuth?.organizationId || user?.organizationId, // Include organizationId from auth context
         submittedBy: testAuth?.userEmail || testAuth?.userName || user?.email || 'current-user',
@@ -426,6 +425,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           responses: submission.responses,
           fileUploads: submission.fileUploads,
           score: submission.score,
+          calculatedScores: submission.calculatedScores, // Include calculated scores for backend storage
           yusaAccessFilter: submission.yusaAccessFilter,
           submittedBy: testAuth?.userEmail || testAuth?.userName || user?.email || 'current-user',
           organizationId: testAuth?.organizationId || user?.organizationId // Get organizationId from authenticated user context
