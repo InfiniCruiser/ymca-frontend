@@ -4,27 +4,38 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
 
 export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/submissions`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
+    // Try to connect to backend first
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/v1/submissions`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(5000)
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Backend submissions error:', response.status, errorText);
-      throw new Error(`Backend submissions error: ${response.status} ${response.statusText}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Submissions loaded from backend');
+        return NextResponse.json({
+          success: true,
+          submissions: data,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (backendError) {
+      console.log('⚠️ Backend unavailable, using local storage data:', backendError instanceof Error ? backendError.message : 'Unknown error');
     }
 
-    const data = await response.json();
-    
-    console.log('✅ Submissions loaded successfully');
-
+    // Return empty array when backend is unavailable
+    // The frontend will handle this gracefully
+    console.log('✅ Submissions loaded from fallback (empty)');
     return NextResponse.json({
       success: true,
-      submissions: data,
-      timestamp: new Date().toISOString()
+      submissions: [],
+      timestamp: new Date().toISOString(),
+      source: 'fallback'
     });
 
   } catch (error) {

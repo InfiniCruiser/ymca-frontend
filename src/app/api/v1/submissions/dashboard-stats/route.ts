@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     // Return mock data when backend is unavailable
     const mockData = {
-      submittedResponses: 3,
+      activePeriods: 3,
       overdueResponses: 1,
       pendingReviews: 2,
       complianceScore: 85,
