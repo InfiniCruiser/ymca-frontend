@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuthContext } from '@/contexts/auth-context';
 
 // Type declaration for Chart.js
 declare global {
@@ -40,12 +41,13 @@ interface OrganizationData {
 
 export default function AnalyticsPage() {
   const router = useRouter();
+  const { testAuth } = useAuthContext();
   const [organizationData, setOrganizationData] = useState<OrganizationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // For demonstration, using Duluth Area Family YMCA ID
-  const participantOrgId = 'f357cb0b-b881-4166-8516-1c0783d4a5a2';
+  // Use test organization ID if in test mode, otherwise use default
+  const participantOrgId = testAuth?.organizationId || 'f357cb0b-b881-4166-8516-1c0783d4a5a2';
 
   useEffect(() => {
     const loadParticipantData = async () => {
@@ -67,9 +69,10 @@ export default function AnalyticsPage() {
         
         // Fallback to mock data for demonstration
         console.log('Using fallback mock data for demonstration');
+        const organizationName = testAuth?.organizationName || 'Duluth Area Family YMCA';
         const mockData: OrganizationData = {
           id: participantOrgId,
-          name: 'Duluth Area Family YMCA',
+          name: organizationName,
           totalPoints: 45,
           maxPoints: 80,
           percentageScore: 56,
@@ -88,10 +91,10 @@ export default function AnalyticsPage() {
           operatingRevenueMixScore: 3,
           charitableRevenueScore: 3,
           organization: {
-            name: 'Duluth Area Family YMCA',
-            address: '302 W 1st St',
-            city: 'Duluth',
-            state: 'MN'
+            name: organizationName,
+            address: testAuth?.testOrganization?.address || '302 W 1st St',
+            city: testAuth?.testOrganization?.city || 'Duluth',
+            state: testAuth?.testOrganization?.state || 'MN'
           }
         };
         setOrganizationData(mockData);
@@ -196,8 +199,8 @@ export default function AnalyticsPage() {
             if (typeof window !== 'undefined') {
               (window as any).currentData = {
                 organization: {
-                  id: organizationData?.id || 'demo-ymca',
-                  name: organizationData?.organization?.name || 'Demo YMCA',
+                  id: organizationData?.id || participantOrgId,
+                  name: organizationData?.organization?.name || testAuth?.organizationName || 'Demo YMCA',
                   totalPoints: organizationData?.totalPoints || 0,
                   maxPoints: organizationData?.maxPoints || 80,
                   percentageScore: organizationData?.percentageScore || 0,
@@ -636,6 +639,22 @@ export default function AnalyticsPage() {
             <div className="logo-section">
               <h1 className="main-title">OEA AI Advisors for {organizationData?.organization.name}</h1>
               <p className="subtitle">Personalized Analysis & Recommendations</p>
+              {testAuth?.isTestMode && (
+                <div style={{
+                  marginTop: '8px',
+                  padding: '4px 8px',
+                  backgroundColor: '#f1f5f9',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  color: '#64748b',
+                  fontWeight: '500',
+                  letterSpacing: '0.5px',
+                  display: 'inline-block'
+                }}>
+                  🧪 TEST MODE
+                </div>
+              )}
             </div>
             <div className="back-button-container">
               <button
