@@ -32,12 +32,13 @@ export default function TestLinksPage() {
         setLoading(true);
         
         try {
-          const response = await fetch('https://ymca-backend-c1a73b2f2522.herokuapp.com/api/v1/organizations', {
+          const response = await fetch('/api/organizations', {
             signal: AbortSignal.timeout(5000)
           });
           
           if (response.ok) {
-            const data = await response.json();
+            const result = await response.json();
+            const data = result.organizations;
             
             // Filter to only active organizations and limit to first 20 for easier selection
             const activeOrgs = data
