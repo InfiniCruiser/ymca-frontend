@@ -171,12 +171,14 @@ export default function DashboardPage() {
                 transition: 'all 0.2s ease'
               }}
               onMouseOver={(e) => {
-                e.target.style.backgroundColor = '#f3f4f6';
-                e.target.style.borderColor = '#9ca3af';
+                const target = e.target as HTMLButtonElement;
+                target.style.backgroundColor = '#f3f4f6';
+                target.style.borderColor = '#9ca3af';
               }}
               onMouseOut={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.borderColor = '#d1d5db';
+                const target = e.target as HTMLButtonElement;
+                target.style.backgroundColor = 'transparent';
+                target.style.borderColor = '#d1d5db';
               }}
             >
               Exit
