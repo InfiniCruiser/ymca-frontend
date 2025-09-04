@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import frameworkQuestions from '@/data/framework-questions.json';
 import { useAuthContext } from '@/contexts/auth-context';
@@ -29,6 +29,20 @@ interface SurveyProps {
 
 type YusaAccessFilter = 'all' | 'yusa_access' | 'non_yusa_access';
 
+interface SurveyDraft {
+  responses: Record<string, any>;
+  currentSection: 'Risk Mitigation' | 'Governance' | 'Engagement';
+  currentQuestion: number;
+  sectionQuestionIndices: {
+    'Risk Mitigation': number;
+    'Governance': number;
+    'Engagement': number;
+  };
+  yusaAccessFilter: YusaAccessFilter;
+  lastSaved: string;
+  organizationId: string;
+}
+
 export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   const { user } = useAuthContext();
   const [currentSection, setCurrentSection] = useState<'Risk Mitigation' | 'Governance' | 'Engagement'>('Risk Mitigation');
@@ -37,6 +51,104 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   const [fileUploads, setFileUploads] = useState<Record<string, File[]>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [yusaAccessFilter, setYusaAccessFilter] = useState<YusaAccessFilter>('all');
+  const [hasDraft, setHasDraft] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [sectionQuestionIndices, setSectionQuestionIndices] = useState({
+    'Risk Mitigation': 0,
+    'Governance': 0,
+    'Engagement': 0
+  });
+
+  // Draft storage utility functions
+  const getDraftKey = useCallback(() => `ymca_survey_draft_${user?.organizationId}`, [user?.organizationId]);
+
+  const saveDraft = useCallback(() => {
+    if (!user?.organizationId) return;
+    
+    // Update the current section's question index before saving
+    const updatedIndices = {
+      ...sectionQuestionIndices,
+      [currentSection]: currentQuestion
+    };
+    
+    const draft: SurveyDraft = {
+      responses,
+      currentSection,
+      currentQuestion,
+      sectionQuestionIndices: updatedIndices,
+      yusaAccessFilter,
+      lastSaved: new Date().toISOString(),
+      organizationId: user.organizationId
+    };
+    
+    localStorage.setItem(getDraftKey(), JSON.stringify(draft));
+    setHasDraft(true);
+  }, [user?.organizationId, responses, currentSection, currentQuestion, sectionQuestionIndices, yusaAccessFilter, getDraftKey]);
+
+  const loadDraft = useCallback((): SurveyDraft | null => {
+    if (!user?.organizationId) return null;
+    
+    try {
+      const draftData = localStorage.getItem(getDraftKey());
+      if (draftData) {
+        const draft = JSON.parse(draftData) as SurveyDraft;
+        // Verify the draft is for the current organization
+        if (draft.organizationId === user.organizationId) {
+          return draft;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading draft:', error);
+    }
+    return null;
+  }, [user?.organizationId, getDraftKey]);
+
+  const clearDraft = useCallback(() => {
+    if (!user?.organizationId) return;
+    localStorage.removeItem(getDraftKey());
+    setHasDraft(false);
+  }, [user?.organizationId, getDraftKey]);
+
+  const resumeDraft = useCallback(() => {
+    const draft = loadDraft();
+    if (draft) {
+      setResponses(draft.responses);
+      setCurrentSection(draft.currentSection);
+      setCurrentQuestion(draft.currentQuestion);
+      setYusaAccessFilter(draft.yusaAccessFilter);
+      setSectionQuestionIndices(draft.sectionQuestionIndices || {
+        'Risk Mitigation': 0,
+        'Governance': 0,
+        'Engagement': 0
+      });
+      setShowResumeModal(false);
+      toast.success('Draft resumed successfully!');
+    }
+  }, [loadDraft]);
+
+  const startFresh = useCallback(() => {
+    clearDraft();
+    setShowResumeModal(false);
+    toast.success('Starting fresh survey');
+  }, [clearDraft]);
+
+  const handleSectionChange = useCallback((newSection: 'Risk Mitigation' | 'Governance' | 'Engagement') => {
+    if (newSection === currentSection) return;
+    
+    // Save current state before switching
+    const updatedIndices = {
+      ...sectionQuestionIndices,
+      [currentSection]: currentQuestion
+    };
+    setSectionQuestionIndices(updatedIndices);
+    
+    // Switch to new section
+    setCurrentSection(newSection);
+    
+    // Restore the question index for the new section
+    const targetQuestionIndex = updatedIndices[newSection];
+    setCurrentQuestion(targetQuestionIndex);
+  }, [currentSection, currentQuestion, sectionQuestionIndices]);
 
   // Filter questions based on Y-USA access and current section
   const filteredQuestions = frameworkQuestions.filter((question: Question) => {
@@ -53,17 +165,29 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
 
   useEffect(() => {
     if (isOpen) {
-      setCurrentSection('Risk Mitigation');
-      setCurrentQuestion(0);
-      setResponses({});
-      setFileUploads({});
+      // Check for existing draft
+      const draft = loadDraft();
+      if (draft) {
+        setShowResumeModal(true);
+        setHasDraft(true);
+      } else {
+        // Start fresh survey
+        setCurrentSection('Risk Mitigation');
+        setCurrentQuestion(0);
+        setResponses({});
+        setFileUploads({});
+        setSectionQuestionIndices({
+          'Risk Mitigation': 0,
+          'Governance': 0,
+          'Engagement': 0
+        });
+        setHasDraft(false);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, loadDraft]);
 
-  useEffect(() => {
-    // Reset to first question when section changes
-    setCurrentQuestion(0);
-  }, [currentSection, yusaAccessFilter]);
+  // Note: Section changes are now handled by handleSectionChange function
+  // which preserves question indices per section
 
   if (!isOpen) return null;
 
@@ -107,14 +231,17 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   };
 
   const handleNext = () => {
+    // Save draft before moving to next question/section
+    saveDraft();
+    
     if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion(prev => prev + 1);
     } else {
       // Move to next section or submit if last section
       if (currentSection === 'Risk Mitigation') {
-        setCurrentSection('Governance');
+        handleSectionChange('Governance');
       } else if (currentSection === 'Governance') {
-        setCurrentSection('Engagement');
+        handleSectionChange('Engagement');
       } else {
         handleSubmit();
       }
@@ -122,16 +249,17 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   };
 
   const handlePrevious = () => {
+    // Save draft before moving to previous question/section
+    saveDraft();
+    
     if (currentQuestion > 0) {
       setCurrentQuestion(prev => prev - 1);
     } else {
       // Move to previous section
       if (currentSection === 'Engagement') {
-        setCurrentSection('Governance');
-        setCurrentQuestion(questions.length - 1);
+        handleSectionChange('Governance');
       } else if (currentSection === 'Governance') {
-        setCurrentSection('Risk Mitigation');
-        setCurrentQuestion(questions.length - 1);
+        handleSectionChange('Risk Mitigation');
       }
     }
   };
@@ -188,6 +316,8 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
         
         if (response.ok) {
           toast.success('Survey submitted successfully!');
+          // Clear draft on successful submission
+          clearDraft();
         } else {
           console.warn('Backend submission failed, but data saved locally');
         }
@@ -217,7 +347,14 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
         {/* Header */}
         <div className="bg-gray-50 px-6 py-4 border-b">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">OEA Self-Assessment Survey</h2>
+            <div className="flex items-center space-x-3">
+              <h2 className="text-xl font-semibold text-gray-900">OEA Self-Assessment Survey</h2>
+              {hasDraft && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  Draft
+                </span>
+              )}
+            </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"
@@ -249,7 +386,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
             {sections.map((section) => (
               <button
                 key={section.name}
-                onClick={() => setCurrentSection(section.name as any)}
+                onClick={() => handleSectionChange(section.name as any)}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   currentSection === section.name
                     ? `${section.color} border-2 border-current`
@@ -400,6 +537,39 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           </div>
         </div>
       </div>
+
+      {/* Resume Draft Modal */}
+      {showResumeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+                <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Resume Draft Survey?</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                You have a saved draft from a previous session. Would you like to resume where you left off or start a new survey?
+              </p>
+              <div className="flex space-x-3">
+                <button
+                  onClick={startFresh}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Start Fresh
+                </button>
+                <button
+                  onClick={resumeDraft}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Resume Draft
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
