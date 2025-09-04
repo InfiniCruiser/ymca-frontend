@@ -53,6 +53,8 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
   const [yusaAccessFilter, setYusaAccessFilter] = useState<YusaAccessFilter>('all');
   const [hasDraft, setHasDraft] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [showFilterWarning, setShowFilterWarning] = useState(false);
+  const [pendingFilterChange, setPendingFilterChange] = useState<YusaAccessFilter | null>(null);
   const [sectionQuestionIndices, setSectionQuestionIndices] = useState({
     'Risk Mitigation': 0,
     'Governance': 0,
@@ -150,6 +152,98 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
     setCurrentQuestion(targetQuestionIndex);
   }, [currentSection, currentQuestion, sectionQuestionIndices]);
 
+  // Check if user has answered any questions
+  const hasAnsweredQuestions = useCallback(() => {
+    return Object.keys(responses).length > 0;
+  }, [responses]);
+
+  // Check if all required questions across all sections are answered
+  const areAllQuestionsAnswered = useCallback(() => {
+    // Get all questions that should be visible with current filter
+    const allVisibleQuestions = frameworkQuestions.filter((question: Question) => {
+      const matchesYusaFilter = 
+        yusaAccessFilter === 'all' || 
+        (yusaAccessFilter === 'yusa_access' && question.yusa_access) ||
+        (yusaAccessFilter === 'non_yusa_access' && !question.yusa_access);
+      return matchesYusaFilter;
+    });
+
+    // Check if all visible questions have responses
+    return allVisibleQuestions.every((question: Question) => {
+      return responses[question.id] !== undefined && responses[question.id] !== '';
+    });
+  }, [frameworkQuestions, yusaAccessFilter, responses]);
+
+  // Get list of unanswered questions for user feedback
+  const getUnansweredQuestions = useCallback(() => {
+    const allVisibleQuestions = frameworkQuestions.filter((question: Question) => {
+      const matchesYusaFilter = 
+        yusaAccessFilter === 'all' || 
+        (yusaAccessFilter === 'yusa_access' && question.yusa_access) ||
+        (yusaAccessFilter === 'non_yusa_access' && !question.yusa_access);
+      return matchesYusaFilter;
+    });
+
+    return allVisibleQuestions.filter((question: Question) => {
+      return responses[question.id] === undefined || responses[question.id] === '';
+    });
+  }, [frameworkQuestions, yusaAccessFilter, responses]);
+
+  // Get user-friendly filter names
+  const getFilterDisplayName = useCallback((filter: YusaAccessFilter) => {
+    switch(filter) {
+      case 'all': return 'All Questions';
+      case 'yusa_access': return 'Y-USA Access Only';
+      case 'non_yusa_access': return 'Non-Y-USA Access Only';
+      default: return filter;
+    }
+  }, []);
+
+  // Handle Y-USA filter change with warning
+  const handleFilterChange = useCallback((newFilter: YusaAccessFilter) => {
+    if (newFilter === yusaAccessFilter) return;
+    
+    // Check if there are answered questions
+    if (hasAnsweredQuestions()) {
+      // Show warning modal
+      setPendingFilterChange(newFilter);
+      setShowFilterWarning(true);
+    } else {
+      // No answered questions, proceed with filter change
+      proceedWithFilterChange(newFilter);
+    }
+  }, [yusaAccessFilter, hasAnsweredQuestions]);
+
+  // Proceed with filter change (reset everything)
+  const proceedWithFilterChange = useCallback((newFilter: YusaAccessFilter) => {
+    // Reset all survey state
+    setResponses({});
+    setFileUploads({});
+    setCurrentSection('Risk Mitigation');
+    setCurrentQuestion(0);
+    setSectionQuestionIndices({
+      'Risk Mitigation': 0,
+      'Governance': 0,
+      'Engagement': 0
+    });
+    setYusaAccessFilter(newFilter);
+    setShowFilterWarning(false);
+    setPendingFilterChange(null);
+    
+    // Clear any existing draft since we're starting fresh
+    clearDraft();
+    
+    toast.success(`Filter changed to "${getFilterDisplayName(newFilter)}"`);
+  }, [getFilterDisplayName, clearDraft]);
+
+  // Cancel filter change
+  const cancelFilterChange = useCallback(() => {
+    setShowFilterWarning(false);
+    setPendingFilterChange(null);
+    // Note: The dropdown will automatically reset to the previous value
+    // because we're not updating yusaAccessFilter state
+  }, []);
+
   // Filter questions based on Y-USA access and current section
   const filteredQuestions = frameworkQuestions.filter((question: Question) => {
     const matchesSection = question.section === currentSection;
@@ -243,7 +337,32 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
       } else if (currentSection === 'Governance') {
         handleSectionChange('Engagement');
       } else {
-        handleSubmit();
+        // End of Engagement section, check if all questions are answered
+        if (areAllQuestionsAnswered()) {
+          handleSubmit();
+        } else {
+          // Show validation error and navigate to first unanswered question
+          const unansweredQuestions = getUnansweredQuestions();
+          if (unansweredQuestions.length > 0) {
+            const firstUnanswered = unansweredQuestions[0];
+            const targetSection = firstUnanswered.section as 'Risk Mitigation' | 'Governance' | 'Engagement';
+            
+            // Navigate to the section with unanswered questions
+            if (targetSection !== currentSection) {
+              handleSectionChange(targetSection);
+            }
+            
+            // Find the question index within that section
+            const sectionQuestions = frameworkQuestions.filter((q: Question) => q.section === targetSection);
+            const questionIndex = sectionQuestions.findIndex((q: Question) => q.id === firstUnanswered.id);
+            
+            if (questionIndex !== -1) {
+              setCurrentQuestion(questionIndex);
+            }
+            
+            toast.error(`Please answer all questions before submitting. Missing ${unansweredQuestions.length} question${unansweredQuestions.length !== 1 ? 's' : ''}.`);
+          }
+        }
       }
     }
   };
@@ -372,7 +491,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
             </label>
             <select
               value={yusaAccessFilter}
-              onChange={(e) => setYusaAccessFilter(e.target.value as YusaAccessFilter)}
+              onChange={(e) => handleFilterChange(e.target.value as YusaAccessFilter)}
               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="all">All Questions</option>
@@ -383,19 +502,34 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
 
           {/* Section Navigation */}
           <div className="flex space-x-2 mb-4">
-            {sections.map((section) => (
-              <button
-                key={section.name}
-                onClick={() => handleSectionChange(section.name as any)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  currentSection === section.name
-                    ? `${section.color} border-2 border-current`
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {section.name}
-              </button>
-            ))}
+            {sections.map((section) => {
+              // Check if this section has unanswered questions
+              const sectionQuestions = frameworkQuestions.filter((q: Question) => q.section === section.name);
+              const hasUnansweredInSection = sectionQuestions.some((q: Question) => {
+                const matchesYusaFilter = 
+                  yusaAccessFilter === 'all' || 
+                  (yusaAccessFilter === 'yusa_access' && q.yusa_access) ||
+                  (yusaAccessFilter === 'non_yusa_access' && !q.yusa_access);
+                return matchesYusaFilter && (responses[q.id] === undefined || responses[q.id] === '');
+              });
+              
+              return (
+                <button
+                  key={section.name}
+                  onClick={() => handleSectionChange(section.name as any)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors relative ${
+                    currentSection === section.name
+                      ? `${section.color} border-2 border-current`
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  {section.name}
+                  {hasUnansweredInSection && currentSection !== section.name && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Progress and Score */}
@@ -531,7 +665,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {currentQuestion === totalQuestions - 1 && currentSection === 'Engagement' 
-                ? (isSubmitting ? 'Submitting...' : 'Submit Survey') 
+                ? (isSubmitting ? 'Submitting...' : (areAllQuestionsAnswered() ? 'Submit Survey' : 'Complete All Questions'))
                 : 'Next'}
             </button>
           </div>
@@ -564,6 +698,42 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
                   className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Resume Draft
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filter Change Warning Modal */}
+      {showFilterWarning && pendingFilterChange && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-yellow-100 rounded-full">
+                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Change Filter Warning</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Changing the filter from <strong>"{getFilterDisplayName(yusaAccessFilter)}"</strong> to <strong>"{getFilterDisplayName(pendingFilterChange)}"</strong> will clear your current answers.
+              </p>
+              <p className="text-sm text-gray-500 mb-6">
+                You have answered <strong>{Object.keys(responses).length}</strong> question{Object.keys(responses).length !== 1 ? 's' : ''} that will be lost. This is because different filters show different sets of questions.
+              </p>
+              <div className="flex space-x-3">
+                <button
+                  onClick={cancelFilterChange}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => proceedWithFilterChange(pendingFilterChange)}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Continue
                 </button>
               </div>
             </div>
