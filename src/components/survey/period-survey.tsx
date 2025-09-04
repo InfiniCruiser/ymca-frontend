@@ -298,7 +298,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
 
   // Calculate current score using the new scoring service
   const calculateScore = () => {
-    const allScores = scoringService.calculateAllScores(responses, questions);
+    const allScores = scoringService.calculateAllScores(responses);
     return {
       totalScore: allScores.operational.totalOperationalPoints,
       maxPossibleScore: allScores.operational.maxOperationalPoints,

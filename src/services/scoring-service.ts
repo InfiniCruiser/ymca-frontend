@@ -1,4 +1,20 @@
-import { Question } from '@/data/framework-questions.json';
+import frameworkQuestions from '@/data/framework-questions.json';
+
+interface Question {
+  id: string;
+  section: string;
+  area: string;
+  metric: string;
+  pathway: string;
+  type: string;
+  options: string[];
+  required: boolean;
+  score: number;
+  yusa_access: boolean;
+  documents_to_review: string[];
+  file_upload_required: boolean;
+  help_text: string;
+}
 
 export interface OperationalScores {
   riskMitigationScore: number;
@@ -42,7 +58,7 @@ export class ScoringService {
    * Calculate operational performance scores from survey responses
    * These are the scores that can be calculated from the actual survey questions
    */
-  calculateOperationalScores(responses: Record<string, any>, questions: Question[]): OperationalScores {
+  calculateOperationalScores(responses: Record<string, any>): OperationalScores {
     let riskMitigationScore = 0;
     let governanceScore = 0;
     let engagementScore = 0;
@@ -50,7 +66,7 @@ export class ScoringService {
     let maxGovernance = 0;
     let maxEngagement = 0;
 
-    questions.forEach((question) => {
+    (frameworkQuestions as Question[]).forEach((question) => {
       const response = responses[question.id];
       const score = response === 'Yes' ? question.score : 0;
 
@@ -115,8 +131,8 @@ export class ScoringService {
   /**
    * Calculate all scores and return comprehensive scoring data
    */
-  calculateAllScores(responses: Record<string, any>, questions: Question[]): AllScores {
-    const operational = this.calculateOperationalScores(responses, questions);
+  calculateAllScores(responses: Record<string, any>): AllScores {
+    const operational = this.calculateOperationalScores(responses);
     const membership = this.calculateMembershipScores();
     const financial = this.calculateFinancialScores();
 
