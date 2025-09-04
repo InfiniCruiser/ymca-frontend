@@ -8,6 +8,8 @@ interface TestAuth {
   organizationName: string;
   isTestMode: boolean;
   testOrganization?: any;
+  userName?: string;
+  userEmail?: string;
 }
 
 interface AuthContextType {

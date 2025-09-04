@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthContext } from '@/contexts/auth-context';
 
 interface Organization {
@@ -50,6 +50,7 @@ interface TestPageProps {
 export default function TestPage({ params }: TestPageProps) {
   const { orgId } = params;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setTestAuth } = useAuthContext();
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,12 +71,18 @@ export default function TestPage({ params }: TestPageProps) {
         if (data.success && data.organization) {
           setOrganization(data.organization);
           
+          // Extract user information from query parameters
+          const userName = searchParams.get('name') || undefined;
+          const userEmail = searchParams.get('email') || undefined;
+          
           // Set test authentication context
           setTestAuth({
             organizationId: data.organization.id,
             organizationName: data.organization.name,
             isTestMode: true,
-            testOrganization: data.organization
+            testOrganization: data.organization,
+            userName,
+            userEmail
           });
 
           // Redirect to main dashboard after a brief delay to show the welcome message
@@ -130,6 +137,9 @@ export default function TestPage({ params }: TestPageProps) {
   }
 
   if (organization) {
+    const userName = searchParams.get('name');
+    const userEmail = searchParams.get('email');
+    
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto p-6">
@@ -138,9 +148,15 @@ export default function TestPage({ params }: TestPageProps) {
             <p className="text-sm mb-2">
               <strong>{organization.name}</strong>
             </p>
-            <p className="text-sm">
+            <p className="text-sm mb-2">
               {organization.city}, {organization.state}
             </p>
+            {userName && (
+              <p className="text-sm">
+                <strong>Tester:</strong> {userName}
+                {userEmail && ` (${userEmail})`}
+              </p>
+            )}
           </div>
           <p className="text-gray-600 text-sm mb-4">
             Redirecting to dashboard...
@@ -153,3 +169,4 @@ export default function TestPage({ params }: TestPageProps) {
 
   return null;
 }
+

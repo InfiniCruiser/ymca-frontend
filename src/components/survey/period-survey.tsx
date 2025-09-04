@@ -406,7 +406,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
         },
         yusaAccessFilter,
         organizationId: testAuth?.organizationId || user?.organizationId, // Include organizationId from auth context
-        submittedBy: user?.email || 'current-user',
+        submittedBy: testAuth?.userEmail || testAuth?.userName || user?.email || 'current-user',
         completed: true
       };
       
@@ -427,7 +427,7 @@ export function PeriodSurvey({ isOpen, onClose, onComplete }: SurveyProps) {
           fileUploads: submission.fileUploads,
           score: submission.score,
           yusaAccessFilter: submission.yusaAccessFilter,
-          submittedBy: user?.email || 'current-user',
+          submittedBy: testAuth?.userEmail || testAuth?.userName || user?.email || 'current-user',
           organizationId: testAuth?.organizationId || user?.organizationId // Get organizationId from authenticated user context
         };
         

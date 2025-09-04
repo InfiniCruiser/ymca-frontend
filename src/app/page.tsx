@@ -155,6 +155,12 @@ export default function DashboardPage() {
                 <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '500' }}>
                   Test Mode: <span style={{ color: '#374151' }}>{testAuth.organizationName}</span>
                 </span>
+                {testAuth.userName && (
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>
+                    Tester: {testAuth.userName}
+                    {testAuth.userEmail && ` (${testAuth.userEmail})`}
+                  </div>
+                )}
               </div>
             </div>
             <button
