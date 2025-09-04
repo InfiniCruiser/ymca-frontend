@@ -87,18 +87,18 @@ export default function AnalyticsPage() {
               throw new Error('Failed to load submission performance data');
             }
           } else {
-            const result = await response.json();
-            if (!result.success) {
-              console.log('⚠️ API returned error for submission:', result.error);
+            const submissionResult = await response.json();
+            if (!submissionResult.success) {
+              console.log('⚠️ API returned error for submission:', submissionResult.error);
               // Fall through to use organization data instead
               response = await fetch(`/api/performance-calculations/organization/${participantOrgId}/latest`);
               if (!response.ok) {
                 throw new Error('Failed to load organization data');
               }
-              const result = await response.json();
-              data = result.performanceCalculation;
+              const orgResult = await response.json();
+              data = orgResult.performanceCalculation;
             } else {
-              data = result.performanceCalculation;
+              data = submissionResult.performanceCalculation;
             }
           }
         } else {
