@@ -24,6 +24,9 @@ export async function GET(
     }
 
     const data = await response.json();
+    console.log('📊 Organization API response data:', JSON.stringify(data, null, 2));
+    console.log('📊 Organization API response type:', typeof data);
+    console.log('📊 Organization API response keys:', data ? Object.keys(data) : 'No data');
     console.log('✅ Latest performance calculation fetched successfully for organization:', orgId);
     
     return NextResponse.json({
