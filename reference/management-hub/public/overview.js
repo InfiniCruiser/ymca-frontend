@@ -488,10 +488,15 @@ function transformToOverviewFormat(apiData) {
         const percentage = (totalPoints / maxPoints) * 100;
         const performance = getPerformanceLevel(percentage);
         
+        // Handle both old format (flat) and new format (nested organization)
+        const orgId = org.organization ? org.organization.id : org.id;
+        const orgName = org.organization ? org.organization.name : org.name;
+        const memberCount = org.organization ? org.organization.memberCount : 5000;
+        
         return {
-            id: org.id,
-            name: org.name,
-            members: 5000, // Default member count since not in API data
+            id: orgId,
+            name: orgName,
+            members: memberCount || 5000, // Use actual member count or default
             totalPoints: totalPoints,
             maxPoints: maxPoints,
             operationalScore: operationalScore,

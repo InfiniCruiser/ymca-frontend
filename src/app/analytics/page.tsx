@@ -48,6 +48,16 @@ export default function AnalyticsPage() {
 
   // Use test organization ID if in test mode, otherwise use default
   const participantOrgId = testAuth?.organizationId || 'f357cb0b-b881-4166-8516-1c0783d4a5a2';
+  
+  // Check for submissionId in URL parameters
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Extract submissionId from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSubmissionId = urlParams.get('submissionId');
+    setSubmissionId(urlSubmissionId);
+  }, []);
 
   useEffect(() => {
     const loadParticipantData = async () => {
@@ -55,15 +65,32 @@ export default function AnalyticsPage() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch participant's organization performance data
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ymca-backend-c1a73b2f2522.herokuapp.com';
-        const response = await fetch(`${backendUrl}/api/v1/performance-calculations/organization/${participantOrgId}/latest`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to load organization data');
+        let response;
+        let data;
+
+        if (submissionId) {
+          // Fetch specific submission's performance data
+          console.log('Fetching performance data for submission:', submissionId);
+          response = await fetch(`/api/performance-calculations/submission/${submissionId}`);
+          
+          if (!response.ok) {
+            throw new Error('Failed to load submission performance data');
+          }
+
+          const result = await response.json();
+          data = result.performanceCalculation;
+        } else {
+          // Fetch latest organization performance data (existing behavior)
+          response = await fetch(`${backendUrl}/api/v1/performance-calculations/organization/${participantOrgId}/latest`);
+          
+          if (!response.ok) {
+            throw new Error('Failed to load organization data');
+          }
+
+          data = await response.json();
         }
 
-        const data = await response.json();
         setOrganizationData(data);
       } catch (err) {
         console.error('Error loading participant data:', err);
@@ -320,7 +347,7 @@ export default function AnalyticsPage() {
         delete (window as any).BaseAdvisor;
       }
     };
-      }, []);
+      }, [submissionId, participantOrgId, testAuth]);
 
     // Generate suggested resources based on performance data
     const generateSuggestedResources = (performanceData: OrganizationData | null) => {
@@ -640,22 +667,38 @@ export default function AnalyticsPage() {
             <div className="logo-section">
               <h1 className="main-title">OEA AI Advisors for {organizationData?.organization.name}</h1>
               <p className="subtitle">Personalized Analysis & Recommendations</p>
-              {testAuth?.isTestMode && (
-                <div style={{
-                  marginTop: '8px',
-                  padding: '4px 8px',
-                  backgroundColor: '#f1f5f9',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  color: '#64748b',
-                  fontWeight: '500',
-                  letterSpacing: '0.5px',
-                  display: 'inline-block'
-                }}>
-                  🧪 TEST MODE
-                </div>
-              )}
+              <div style={{ marginTop: '8px', display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                {testAuth?.isTestMode && (
+                  <div style={{
+                    padding: '4px 8px',
+                    backgroundColor: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    color: '#64748b',
+                    fontWeight: '500',
+                    letterSpacing: '0.5px',
+                    display: 'inline-block'
+                  }}>
+                    🧪 TEST MODE
+                  </div>
+                )}
+                {submissionId && (
+                  <div style={{
+                    padding: '4px 8px',
+                    backgroundColor: '#e0f2fe',
+                    border: '1px solid #0ea5e9',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    color: '#0369a1',
+                    fontWeight: '500',
+                    letterSpacing: '0.5px',
+                    display: 'inline-block'
+                  }}>
+                    📊 Submission: {submissionId.substring(0, 8)}...
+                  </div>
+                )}
+              </div>
             </div>
             <div className="back-button-container">
               <button

@@ -292,6 +292,10 @@ class PerformanceCalculationService {
         o.id,
         o.name,
         o.code,
+        o.location,
+        o.city,
+        o.state,
+        o.member_count,
         pc.percentage_score,
         pc.performance_category,
         pc.total_points,
@@ -306,7 +310,26 @@ class PerformanceCalculationService {
     `;
     
     const result = await this.db.query(query);
-    return result.rows;
+    
+    // Transform the data to match the expected format for management hub
+    return result.rows.map(row => ({
+      organization: {
+        id: row.id,
+        name: row.name,
+        code: row.code,
+        location: row.location,
+        city: row.city,
+        state: row.state,
+        memberCount: row.member_count
+      },
+      percentageScore: row.percentage_score,
+      performanceCategory: row.performance_category,
+      totalPoints: row.total_points,
+      operationalTotalPoints: row.operational_total_points,
+      financialTotalPoints: row.financial_total_points,
+      supportDesignation: row.support_designation,
+      calculatedAt: row.calculated_at
+    }));
   }
 
   async getOrganizationPerformance(organizationId) {

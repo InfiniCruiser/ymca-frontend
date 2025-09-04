@@ -79,6 +79,7 @@ export async function POST(request: NextRequest) {
       try {
         const performanceData = {
           organizationId: body.organizationId,
+          submissionId: data.id, // Include the submission ID that generated these scores
           period: body.periodId || `period_${Date.now()}`,
           // Operational scores (calculated from survey responses)
           riskMitigationScore: body.calculatedScores.operational.riskMitigationScore,

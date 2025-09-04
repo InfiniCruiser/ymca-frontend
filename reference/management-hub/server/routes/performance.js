@@ -41,6 +41,42 @@ router.get('/organizations/:id', async (req, res) => {
   }
 });
 
+// Get all performance calculations for management hub
+router.get('/performance-calculations', async (req, res) => {
+  try {
+    const overview = await performanceService.getOverviewData();
+    res.json(overview);
+  } catch (error) {
+    console.error('Error fetching performance calculations:', error);
+    res.status(500).json({ error: 'Failed to fetch performance calculations' });
+  }
+});
+
+// Save performance calculation from frontend
+router.post('/performance-calculations', async (req, res) => {
+  try {
+    const performanceData = req.body;
+    console.log('Received performance calculation data:', performanceData);
+    
+    // Save the performance calculation to database
+    await performanceService.savePerformanceCalculation(performanceData);
+    
+    res.json({ 
+      success: true, 
+      message: 'Performance calculation saved successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error saving performance calculation:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to save performance calculation',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Test database connection
 router.get('/test-connection', async (req, res) => {
   try {
