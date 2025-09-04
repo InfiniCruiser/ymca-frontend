@@ -197,7 +197,7 @@ export default function DashboardPage() {
           {/* Performance Overview */}
           <div className="performance-overview">
             <div className="overview-card">
-              <h2>Welcome back, John!</h2>
+              <h2>Welcome back, {testAuth?.userName || 'John'}!</h2>
               <p>Here's what's happening with your Organizational Excellence Assessment today.</p>
               
               <div className="stats-grid" style={{
